@@ -1,0 +1,52 @@
+apply plugin: 'idea'
+
+group 'scala.persistent.data-structures'
+version '1.0-SNAPSHOT'
+
+ScalaCompileOptions.metaClass.daemonServer = true
+ScalaCompileOptions.metaClass.fork = true
+ScalaCompileOptions.metaClass.useAnt = false
+ScalaCompileOptions.metaClass.useCompileDaemon = false
+
+configurations {
+    scalaCompiler
+}
+
+tasks.withType(ScalaCompile) {
+    scalaClasspath = configurations.scalaCompiler
+}
+
+allprojects {
+    apply plugin: 'scala'
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    group = 'scala.tdd.katas'
+    version = '1.0-SNAPSHOT'
+
+    buildDir = "target"
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+
+    repositories {
+        mavenCentral()
+
+        maven { url "https://maven.repository.redhat.com/techpreview/all/" }
+        maven { url "http://repo1.maven.org/maven2" }
+        maven { url "http://repository.jboss.org/nexus/content/groups/public/" }
+        maven { url "http://scala-tools.org/repo-releases" }
+    }
+
+    dependencies {
+        compile 'org.scala-lang:scala-library:2.12.0-M5'
+        testCompile "org.scalatest:scalatest_2.12.0-M5:3.0.0"
+        testCompile "junit:junit:4.12"
+    }
+
+}
