@@ -4,4 +4,4 @@ jdk:
 - oraclejdk8
 
 after_success:
-- gradle coberturaCheck coverall
+- gradle check cobertura coverall
