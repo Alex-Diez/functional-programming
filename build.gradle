@@ -32,8 +32,6 @@ targetCompatibility = 1.8
 group 'scala.persistent.data-structures'
 version '1.0-SNAPSHOT'
 
-buildDir = "target"
-
 jacocoTestReport {
     reports {
         xml.enabled = true
