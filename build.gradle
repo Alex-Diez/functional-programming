@@ -1,7 +1,21 @@
 apply plugin: 'idea'
+apply plugin: 'cobertura'
+apply plugin: 'com.github.kt3k.coveralls'
 
 group 'scala.persistent.data-structures'
 version '1.0-SNAPSHOT'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url "https://oss.sonatype.org/content/groups/public" }
+    }
+    dependencies {
+        classpath 'org.scoverage:gradle-scoverage:0.6-SNAPSHOT'
+        classpath 'net.saliman:gradle-cobertura-plugin:2.0.0'
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1'
+    }
+}
 
 ScalaCompileOptions.metaClass.daemonServer = true
 ScalaCompileOptions.metaClass.fork = true
@@ -33,6 +47,9 @@ allprojects {
 }
 
 subprojects {
+
+    cobertura.coverageFormats = ['html', 'xml']
+    cobertura.coverageSourceDirs = sourceSets.main.scala.srcDirs
 
     repositories {
         mavenCentral()

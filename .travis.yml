@@ -4,7 +4,7 @@ env:
 - TERM=dumb
 
 script:
-- ./gradlew cobertura coveralls
+- gradle cobertura coveralls
 
 install:
 - /bin/true
