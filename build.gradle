@@ -1,12 +1,20 @@
 buildscript {
     repositories {
         mavenCentral()
+
         maven { url "https://oss.sonatype.org/content/groups/public" }
+        maven { url "http://repo1.maven.org/maven2" }
+        maven { url "http://scala-tools.org/repo-releases" }
     }
     dependencies {
         classpath 'org.scoverage:gradle-scoverage:0.6-SNAPSHOT'
         classpath 'net.saliman:gradle-cobertura-plugin:2.0.0'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1'
+
+        classpath 'org.scala-lang:scala-library:2.12.0-M5'
+
+        classpath "org.scalatest:scalatest_2.12.0-M5:3.0.0"
+        classpath "junit:junit:4.12"
     }
 }
 
@@ -16,9 +24,15 @@ plugins {
 }
 
 apply plugin: 'idea'
+apply plugin: 'scala'
+apply plugin: 'java'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 group 'scala.persistent.data-structures'
 version '1.0-SNAPSHOT'
+
+buildDir = "target"
 
 ScalaCompileOptions.metaClass.daemonServer = true
 ScalaCompileOptions.metaClass.fork = true
@@ -29,44 +43,22 @@ configurations {
     scalaCompiler
 }
 
-tasks.withType(ScalaCompile) {
-    scalaClasspath = configurations.scalaCompiler
+task compileModelDescriptor(type: ScalaCompile) {
+    classpath = configurations.scalaCompiler
 }
 
-allprojects {
-    apply plugin: 'scala'
-    apply plugin: 'java'
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+cobertura.coverageFormats = ['html', 'xml']
+cobertura.coverageSourceDirs = sourceSets.main.scala.srcDirs
 
-    group = 'scala.tdd.katas'
-    version = '1.0-SNAPSHOT'
+repositories {
+    mavenCentral()
 
-    buildDir = "target"
-
-    repositories {
-        mavenCentral()
-    }
+    maven { url "http://repo1.maven.org/maven2" }
+    maven { url "http://scala-tools.org/repo-releases" }
 }
 
-subprojects {
-
-    cobertura.coverageFormats = ['html', 'xml']
-    cobertura.coverageSourceDirs = sourceSets.main.scala.srcDirs
-
-    repositories {
-        mavenCentral()
-
-        maven { url "https://maven.repository.redhat.com/techpreview/all/" }
-        maven { url "http://repo1.maven.org/maven2" }
-        maven { url "http://repository.jboss.org/nexus/content/groups/public/" }
-        maven { url "http://scala-tools.org/repo-releases" }
-    }
-
-    dependencies {
-        compile 'org.scala-lang:scala-library:2.12.0-M5'
-        testCompile "org.scalatest:scalatest_2.12.0-M5:3.0.0"
-        testCompile "junit:junit:4.12"
-    }
-
+dependencies {
+    compile "org.scala-lang:scala-library:2.12.0-M5"
+    testCompile "org.scalatest:scalatest_2.12.0-M5:3.0.0"
+    testCompile "junit:junit:4.12"
 }
