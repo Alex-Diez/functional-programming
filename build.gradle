@@ -19,7 +19,7 @@ buildscript {
 }
 
 plugins {
-    id 'net.saliman.cobertura' version '2.3.1'
+    id 'jacoco'
     id 'com.github.kt3k.coveralls' version '2.6.3'
 }
 
@@ -34,6 +34,13 @@ version '1.0-SNAPSHOT'
 
 buildDir = "target"
 
+jacocoTestReport {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+}
+
 ScalaCompileOptions.metaClass.daemonServer = true
 ScalaCompileOptions.metaClass.fork = true
 ScalaCompileOptions.metaClass.useAnt = false
@@ -47,8 +54,8 @@ task compileModelDescriptor(type: ScalaCompile) {
     classpath = configurations.scalaCompiler
 }
 
-cobertura.coverageFormats = ['html', 'xml']
-cobertura.coverageSourceDirs = sourceSets.main.scala.srcDirs
+//cobertura.coverageFormats = ['html', 'xml']
+//cobertura.coverageSourceDirs = sourceSets.main.scala.srcDirs
 
 repositories {
     mavenCentral()

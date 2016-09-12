@@ -71,8 +71,4 @@ class PersistentStackTest extends FlatSpec with Matchers with BeforeAndAfter {
 
         filtered.toIterator.toStream should contain inOrderOnly (50, 40, 30, 20)
     }
-
-    "A stack" should "" in {
-        pending
-    }
 }
