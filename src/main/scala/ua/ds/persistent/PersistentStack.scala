@@ -1,60 +1,57 @@
 package ua.ds.persistent
 
-trait Stack[T] {
+sealed trait Stack[+T] {
     def peek: Option[T]
 
     def size(): Int
 
-    def push(value: T): Stack[T]
+    def push[E >: T](element: E): Stack[T] = NoneEmptyStack[T](size() + 1, Some(element.asInstanceOf[T]), this)
 
-    def pop(): Option[Stack[T]]
+    def pop(): Stack[T]
 
-    def toIterator: Iterator[T]
+    def toIterator: Iterator[Option[T]] = StackIterator[T](this)
 
     def foreach[A](mapperFunctor: T => A): Stack[A]
 
     def filter(filterFunctor: (T) => Boolean): Stack[T]
 }
 
-object PersistentStack {
-    def apply[T](): PersistentStack[T] = new PersistentStack(0, None, None)
+object Stack {
+    def apply[T](): Stack[T] = Nil()
 }
 
-class PersistentStack[T](val size: Int, val peek: Option[T], val pop: Option[Stack[T]]) extends Stack[T] {
-    override def push(value: T): Stack[T] = {
-        new PersistentStack(size + 1, Some(value), Some(this))
-    }
+final case class Nil[+T]() extends Stack[T] {
+    override def peek: Option[T] = None
 
-    override def toIterator: Iterator[T] = {
-        new StackIterator(this)
-    }
+    override def size(): Int = 0
 
+    override def pop(): Stack[T] = Nil[T]()
+
+    override def foreach[A](mapperFunctor: (T) => A): Stack[A] = Nil[A]()
+
+    override def filter(filterFunctor: (T) => Boolean): Stack[T] = Nil[T]()
+}
+
+final case class NoneEmptyStack[+T](size: Int, peek: Option[T], pop: Stack[T]) extends Stack[T] {
     override def foreach[A](mapperFunctor: T => A): Stack[A] = {
-        new PersistentStack[A](size, peek.map(mapperFunctor), pop.map(s => s.foreach(mapperFunctor)))
+        NoneEmptyStack[A](size, peek.map(mapperFunctor), pop.foreach(mapperFunctor))
     }
 
     override def filter(filterFunctor: (T) => Boolean): Stack[T] = {
-        pop match {
-            case Some(e) =>
-                val elem = e.filter(filterFunctor)
-                peek match {
-                    case Some(v) if filterFunctor(v) => new PersistentStack(elem.size + 1, Some(v), Some(elem))
-                    case _ => elem
-                }
-            case None => peek match {
-                case Some(v) if filterFunctor(v) => new PersistentStack(1, Some(v), None)
-                case None => PersistentStack()
-            }
+        val elem = pop.filter(filterFunctor)
+        peek match {
+            case Some(v) if filterFunctor(peek.get) => NoneEmptyStack(elem.size + 1, peek, elem)
+            case _ => elem
         }
     }
 }
 
-private class StackIterator[T](var elem: Stack[T]) extends Iterator[T] {
+private case class StackIterator[T](var elem: Stack[T]) extends Iterator[Option[T]] {
     override def hasNext: Boolean = elem.size() != 0
 
-    override def next(): T = {
-        val r = elem.peek.get
-        elem = elem.pop().get
+    override def next(): Option[T] = {
+        val r = elem.peek
+        elem = elem.pop()
         r
     }
 }
