@@ -5,11 +5,20 @@ sealed trait Stack[T] {
 
     def size(): Int
 
-    def push(element: T): Stack[T] = Stack.NoneEmptyStack[T](size() + 1, Some(element), this)
+    def push(element: T): Stack[T] = Stack.Frame[T](size() + 1, element, this)
 
     def pop(): Stack[T]
 
-    def toIterator: Iterator[Option[T]] = StackIterator[T](this)
+    def toIterator: Iterator[T] = {
+        def collect(frame: Stack[T], list: List[T]): List[T] = {
+            frame.peek match {
+                case None => list
+                case Some(value) => value :: collect(frame.pop(), list)
+            }
+        }
+
+        collect(this, List()).toIterator
+    }
 
     def foreach[A](mapperFunctor: T => A): Stack[A]
 
@@ -24,34 +33,27 @@ object Stack {
 
         override def size(): Int = 0
 
-        override def pop(): Stack[T] = Nil[T]()
+        override def pop(): Stack[T] = this
 
         override def foreach[A](mapperFunctor: (T) => A): Stack[A] = Nil[A]()
 
-        override def filter(filterFunctor: (T) => Boolean): Stack[T] = Nil[T]()
+        override def filter(filterFunctor: (T) => Boolean): Stack[T] = this
     }
 
-    final case class NoneEmptyStack[T](size: Int, peek: Option[T], pop: Stack[T]) extends Stack[T] {
+    final case class Frame[T](size: Int, element: T, pop: Stack[T]) extends Stack[T] {
+        override def peek: Option[T] = Some(element)
+
         override def foreach[A](mapperFunctor: T => A): Stack[A] = {
-            NoneEmptyStack[A](size, peek.map(mapperFunctor), pop.foreach(mapperFunctor))
+            Frame[A](size, mapperFunctor(element), pop.foreach(mapperFunctor))
         }
 
         override def filter(filterFunctor: (T) => Boolean): Stack[T] = {
             val elem = pop.filter(filterFunctor)
             peek match {
-                case Some(v) if filterFunctor(peek.get) => NoneEmptyStack(elem.size + 1, peek, elem)
+                case Some(v) if filterFunctor(v) => Frame(elem.size + 1, v, elem)
                 case _ => elem
             }
         }
     }
-}
 
-private case class StackIterator[T](var elem: Stack[T]) extends Iterator[Option[T]] {
-    override def hasNext: Boolean = elem.size() != 0
-
-    override def next(): Option[T] = {
-        val r = elem.peek
-        elem = elem.pop()
-        r
-    }
 }

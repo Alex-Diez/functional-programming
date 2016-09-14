@@ -44,7 +44,7 @@ class PersistentStackTest extends FlatSpec with Matchers with BeforeAndAfter {
                 .push(40)
                 .push(50)
 
-        stack.toIterator.toStream should contain inOrderOnly (Some(50), Some(40), Some(30), Some(20), Some(10))
+        stack.toIterator.toStream should contain inOrderOnly (50, 40, 30, 20, 10)
     }
 
     "A stack" should "be created from existed one" in {
@@ -54,8 +54,8 @@ class PersistentStackTest extends FlatSpec with Matchers with BeforeAndAfter {
 
         val otherStack = stack.foreach(e => e * 2)
 
-        stack.toIterator.toStream should contain inOrderOnly (Some(50), Some(40), Some(30))
-        otherStack.toIterator.toStream should contain inOrderOnly (Some(100), Some(80), Some(60))
+        stack.toIterator.toStream should contain inOrderOnly (50, 40, 30)
+        otherStack.toIterator.toStream should contain inOrderOnly (100, 80, 60)
     }
 
     "A stack" should "be filtered" in {
@@ -69,12 +69,7 @@ class PersistentStackTest extends FlatSpec with Matchers with BeforeAndAfter {
 
         val filtered = stack.filter(e => e % 10 == 0)
 
-        filtered.toIterator.toStream should contain inOrderOnly (Some(50), Some(40), Some(30), Some(20))
-    }
-
-    "Iterator of empty stack" should "return always None" in {
-        val iter = emptyStack.toIterator
-
-        iter.next shouldBe None
+        filtered.toIterator.toStream should contain inOrderOnly (50, 40, 30, 20)
+        filtered.size shouldBe 4
     }
 }
