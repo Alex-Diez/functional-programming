@@ -1,27 +1,27 @@
 package ua.ds.persistent
 
-import org.scalatest.{FlatSpec, FunSuite, Matchers}
+import org.scalatest.{FunSuite, Matchers}
 
-class BalancedBinaryTree extends FunSuite with Matchers {
+class BalancedBinaryTreeTest extends FunSuite with Matchers {
 
     test("create balanced tree") {
-        BalancedTree()
+        BalancedBinarySearchTree()
     }
 
     test("the height of an empty tree should be zero") {
-        val tree = BalancedTree()
+        val tree = BalancedBinarySearchTree()
 
         tree.height shouldBe 0
     }
 
     test("a tree should contain inserted value") {
-        val tree = BalancedTree().insert(2)
+        val tree = BalancedBinarySearchTree().insert(2)
 
         tree.contains(2) shouldBe true
     }
 
     test("a tree should contain all inserted values") {
-        val tree = BalancedTree().insert(1).insert(2).insert(3)
+        val tree = BalancedBinarySearchTree().insert(1).insert(2).insert(3)
 
         tree.contains(1) shouldBe true
         tree.contains(2) shouldBe true
@@ -29,13 +29,13 @@ class BalancedBinaryTree extends FunSuite with Matchers {
     }
 
     test("a tree should not contain not inserted value") {
-        val tree = BalancedTree().insert(1)
+        val tree = BalancedBinarySearchTree().insert(1)
 
         tree.contains(2) shouldBe false
     }
 
     ignore("a tree should be balanced after inserting elements in order") {
-        val tree = BalancedTree().insert(1).insert(2).insert(3)
+        val tree = BalancedBinarySearchTree().insert(1).insert(2).insert(3)
 
         tree.height shouldBe 2
         tree.value shouldBe Some(2)
