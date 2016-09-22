@@ -1,11 +1,11 @@
 package ua.ds.persistent
 
-sealed trait Stack[T] {
+sealed trait Stack[+T] {
     def peek: Option[T]
 
     def size(): Int
 
-    def push(element: T): Stack[T] = Stack.Frame[T](size() + 1, element, this)
+    def push[E >: T](element: E): Stack[E] = Stack.Frame[E](size() + 1, element, this)
 
     def pop(): Stack[T]
 
@@ -20,40 +20,38 @@ sealed trait Stack[T] {
         collect(this, List()).toIterator
     }
 
-    def foreach[A](mapperFunctor: T => A): Stack[A]
+    def foreach[A](mapperFunctor: T => A): Stack[A] = {
+        this match {
+            case Stack.Nil => Stack.Nil
+            case Stack.Frame(size, element, pop) => Stack.Frame[A](size, mapperFunctor(element), pop.foreach(mapperFunctor))
+        }
+    }
 
-    def filter(filterFunctor: (T) => Boolean): Stack[T]
+    def filter(filterFunctor: (T) => Boolean): Stack[T] = {
+        this match {
+            case Stack.Nil => Stack.Nil
+            case Stack.Frame(size, element, pop) =>
+                val elem = pop.filter(filterFunctor)
+                peek match {
+                    case Some(v) if filterFunctor(v) => Stack.Frame(elem.size + 1, v, elem)
+                    case _ => elem
+                }
+        }
+    }
 }
 
 object Stack {
-    def apply[T](): Stack[T] = Stack.Nil()
+    def apply[T](): Stack[T] = Stack.Nil
 
-    final case class Nil[T]() extends Stack[T] {
-        override def peek: Option[T] = None
+    case object Nil extends Stack[Nothing] {
+        override def peek: Option[Nothing] = None
 
         override def size(): Int = 0
 
-        override def pop(): Stack[T] = this
-
-        override def foreach[A](mapperFunctor: (T) => A): Stack[A] = Nil[A]()
-
-        override def filter(filterFunctor: (T) => Boolean): Stack[T] = this
+        override def pop(): Stack[Nothing] = this
     }
 
     final case class Frame[T](size: Int, element: T, pop: Stack[T]) extends Stack[T] {
         override def peek: Option[T] = Some(element)
-
-        override def foreach[A](mapperFunctor: T => A): Stack[A] = {
-            Frame[A](size, mapperFunctor(element), pop.foreach(mapperFunctor))
-        }
-
-        override def filter(filterFunctor: (T) => Boolean): Stack[T] = {
-            val elem = pop.filter(filterFunctor)
-            peek match {
-                case Some(v) if filterFunctor(v) => Frame(elem.size + 1, v, elem)
-                case _ => elem
-            }
-        }
     }
-
 }
