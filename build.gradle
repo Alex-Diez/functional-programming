@@ -64,3 +64,15 @@ dependencies {
     testCompile "org.scalatest:scalatest_2.12.0-M5:3.0.0"
     testCompile "junit:junit:4.12"
 }
+
+if (System.env.TRAVIS == 'true') {
+    allprojects {
+        tasks.withType(GroovyCompile) {
+            groovyOptions.fork = false
+        }
+        tasks.withType(Test) {
+            maxParallelForks = 2
+            minHeapSize = '128m'
+        }
+    }
+}
