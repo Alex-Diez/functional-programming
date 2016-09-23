@@ -1,7 +1,10 @@
 package ua.ds.persistent
 
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSuite, Matchers}
 
+@RunWith(classOf[JUnitRunner])
 class BalancedBinaryTreeTest extends FunSuite with Matchers {
 
     test("create balanced tree") {
