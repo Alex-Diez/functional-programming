@@ -68,24 +68,28 @@ class BinarySearchTreeTest extends FlatSpec with Matchers {
     }
 
     "An Iterator" should "iterate pre order over tree" in {
+        pending
         val tree = BinarySearchTree[Int]().insert(5).insert(2).insert(1).insert(4).insert(7).insert(6).insert(8)
 
         tree.preOrderIterator().toStream should contain inOrderOnly(5, 2, 1, 4, 7, 6, 8)
     }
 
     "An Iterator" should "iterate post order over tree" in {
+        pending
         val tree = BinarySearchTree[Int]().insert(5).insert(2).insert(1).insert(4).insert(7).insert(6).insert(8)
 
         tree.postOrderIterator().toStream should contain inOrderOnly(1, 4, 2, 6, 8, 7, 5)
     }
 
     "An Iterator" should "iterate in order over tree" in {
+        pending
         val tree = BinarySearchTree[Int]().insert(5).insert(2).insert(1).insert(4).insert(7).insert(6).insert(8)
 
         tree.toIterator.toStream should contain inOrderOnly(1, 2, 4, 5, 6, 7, 8)
     }
 
     "A BST" should "be created from existed one" in {
+        pending
         val tree = BinarySearchTree[Int]().insert(5).insert(2).insert(1).insert(4).insert(7).insert(6).insert(8)
 
         val otherTree = tree.foreach((e: Int) => (e * 2).toString)
@@ -95,6 +99,7 @@ class BinarySearchTreeTest extends FlatSpec with Matchers {
     }
 
     "A BST" should "be filtered" in {
+        pending
         val tree = BinarySearchTree[Int]().insert(5).insert(2).insert(1).insert(4).insert(7).insert(6).insert(8)
 
         val otherTree = tree.filter((e: Int) => e % 2 == 0)

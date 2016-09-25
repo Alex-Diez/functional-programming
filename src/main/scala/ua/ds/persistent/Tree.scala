@@ -18,7 +18,7 @@ trait Tree[+A, Repr[+X] <: Tree[X, Repr]] {
     def toIterator: Iterator[A] = {
         def inOrderVisit(tree: Repr[A], list: List[A]): List[A] = {
             tree.value() match {
-                case Some(v) => (inOrderVisit(tree.left(), list) :+ v) ++ inOrderVisit(tree.right(), list)
+                case Some(v) => (inOrderVisit(tree.left(), list) addToTail v) concatenate inOrderVisit(tree.right(), list)
                 case None => list
             }
         }
@@ -29,7 +29,7 @@ trait Tree[+A, Repr[+X] <: Tree[X, Repr]] {
     def preOrderIterator(): Iterator[A] = {
         def preOrderVisit(tree: Repr[A], list: List[A]): List[A] = {
             tree.value() match {
-                case Some(v) => v :: preOrderVisit(tree.left(), list) ++ preOrderVisit(tree.right(), list)
+                case Some(v) => (preOrderVisit(tree.left(), list) concatenate preOrderVisit(tree.right(), list)) add v
                 case None => list
             }
         }
@@ -40,7 +40,7 @@ trait Tree[+A, Repr[+X] <: Tree[X, Repr]] {
     def postOrderIterator(): Iterator[A] = {
         def postOrderVisit(tree: Repr[A], list: List[A]): List[A] = {
             tree.value() match {
-                case Some(v) => postOrderVisit(tree.left(), list) ++ postOrderVisit(tree.right(), list) :+ v
+                case Some(v) => postOrderVisit(tree.left(), list) concatenate  postOrderVisit(tree.right(), list) addToTail  v
                 case None => list
             }
         }
