@@ -29,7 +29,7 @@ trait Tree[+A, Repr[+X] <: Tree[X, Repr]] {
     def preOrderIterator(): Iterator[A] = {
         def preOrderVisit(tree: Repr[A], list: List[A]): List[A] = {
             tree.value() match {
-                case Some(v) => (preOrderVisit(tree.left(), list) concatenate preOrderVisit(tree.right(), list)) add v
+                case Some(v) => (preOrderVisit(tree.left(), list) concatenate preOrderVisit(tree.right(), list)) addToHead v
                 case None => list
             }
         }
