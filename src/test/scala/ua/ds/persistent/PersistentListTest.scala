@@ -7,7 +7,7 @@ import org.scalatest.junit.JUnitRunner
 @RunWith(classOf[JUnitRunner])
 class PersistentListTest extends FunSuite with Matchers {
 
-    var emptyList = List[Int]()
+    val emptyList = List[Int]()
 
     test("empty list has size 0") {
         emptyList.size shouldBe 0
