@@ -14,6 +14,34 @@ class PersistentListTest extends FunSuite with Matchers {
         emptyList.isEmpty shouldBe true
     }
 
+    test("the head of an empty list is None") {
+        emptyList.head shouldBe None
+    }
+
+    test("the head of not empty list is last added value") {
+        val list = emptyList.addToHead(10)
+
+        list.head shouldBe Some(10)
+    }
+
+    test("the tail of an empty list is an empty list") {
+        emptyList.tail shouldBe emptyList
+    }
+
+    test("the tail of 1 element is an empty list") {
+        val list = emptyList.addToHead(10)
+
+        list.tail shouldBe emptyList
+    }
+
+    test("the tail of list is a list without head") {
+        val tail = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40)
+
+        val list = tail.addToHead(50)
+
+        list.tail shouldBe tail
+    }
+
     test("list's size is growing when add new element") {
         val list = emptyList.addToHead(1)
 

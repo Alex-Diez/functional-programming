@@ -20,6 +20,8 @@ sealed trait List[+T] {
 
     def head: Option[T]
 
+    def tail: List[T]
+
     def toIterator: Iterator[T] = new AbstractIterator[T] {
         var these = self
 
@@ -59,6 +61,8 @@ object List {
         override def contains[E](element: E): Boolean = false
 
         override def head: Option[Nothing] = None
+
+        def tail: List[Nothing] = List.Nil
     }
 
     final case class Cons[+T](size: Int, elem: T, tail: List[T]) extends List[T] {
