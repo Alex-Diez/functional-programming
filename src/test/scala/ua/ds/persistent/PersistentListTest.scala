@@ -153,5 +153,25 @@ class PersistentListTest extends FunSuite with Matchers {
 
         dropped.isEmpty shouldBe true
     }
+
+    test("should drop nothing from an empty list") {
+        emptyList.dropWhile()(e => e != 0) shouldBe emptyList
+    }
+
+    test("should drop while element more than 30") {
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
+
+        val dropped = list.dropWhile()(e => e > 30)
+
+        dropped.contains(30) shouldBe true
+        dropped.contains(20) shouldBe true
+        dropped.contains(10) shouldBe true
+    }
+
+    test("should drop whole list when predicate is true for all elements in the list") {
+        val list = emptyList.addToHead(10).addToHead(15).addToHead(20).addToHead(35)
+
+        list.dropWhile()(e => e % 5 == 0) shouldBe emptyList
+    }
 }
 

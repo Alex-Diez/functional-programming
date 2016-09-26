@@ -4,6 +4,8 @@ import scala.collection.AbstractIterator
 
 sealed trait List[+T] {
     self =>
+    def dropWhile()(predicate: (T) => Boolean): List[T]
+
     def drop(size: Int): List[T]
 
     def setHead[E >: T](element: E): List[E]
@@ -46,6 +48,8 @@ object List {
 
     case object Nil extends List[Nothing] {
 
+        override def dropWhile()(predicate: (Nothing) => Boolean): List[Nothing] = this
+
         override def drop(size: Int): List[Nothing] = this
 
         override def setHead[E >: Nothing](element: E): List[E] = addToHead(element)
@@ -66,6 +70,11 @@ object List {
     }
 
     final case class Cons[+T](size: Int, elem: T, tail: List[T]) extends List[T] {
+
+        override def dropWhile()(predicate: (T) => Boolean): List[T] = {
+            if (predicate(elem)) tail.dropWhile()(predicate)
+            else this
+        }
 
         override def drop(size: Int): List[T] = {
             if (size == 0) this
