@@ -42,7 +42,7 @@ class PersistentListTest extends FunSuite with Matchers {
         list.contains(40) shouldBe true
     }
 
-    test ("element should be added to empty list") {
+    test("element should be added to empty list") {
         val list = emptyList.addToTail(20)
 
         list.size shouldBe 1
@@ -69,6 +69,22 @@ class PersistentListTest extends FunSuite with Matchers {
         val listTwo = emptyList.addToHead(40).addToHead(50).addToHead(60)
 
         listOne.concatenate(listTwo).toIterator.toStream should contain inOrderOnly(30, 20, 10, 60, 50, 40)
+    }
+
+    test("set head on empty list") {
+        val changed = emptyList.setHead(10)
+
+        changed.head shouldBe Some(10)
+        changed.size shouldBe 1
+    }
+
+    test("change head of a list") {
+        val baseline = emptyList.addToHead(10).addToHead(30)
+
+        val changedHead = baseline.setHead(20)
+
+        changedHead.head shouldBe Some(20)
+        changedHead.size shouldBe 2
     }
 }
 

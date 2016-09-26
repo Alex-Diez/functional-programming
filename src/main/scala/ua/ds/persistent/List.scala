@@ -4,6 +4,8 @@ import scala.collection.AbstractIterator
 
 sealed trait List[+T] {
     self =>
+    def setHead[E >: T](element: E): List[E]
+
     def addToHead[E >: T](element: E): List[E]
 
     def addToTail[E >: T](element: E): List[E]
@@ -39,6 +41,9 @@ object List {
     def apply[T](): List[T] = Nil
 
     case object Nil extends List[Nothing] {
+
+        override def setHead[E >: Nothing](element: E): List[E] = addToHead(element)
+
         override def addToHead[E](element: E): List[E] = Cons(1, element, Nil)
 
         override def addToTail[E >: Nothing](element: E): List[E] = List.Cons(1, element, List.Nil)
@@ -53,6 +58,9 @@ object List {
     }
 
     final case class Cons[+T](size: Int, elem: T, tail: List[T]) extends List[T] {
+
+        override def setHead[E >: T](element: E): List[E] = Cons(size, element, tail)
+
         override def addToHead[E >: T](element: E): List[E] = Cons(size + 1, element, this)
 
         override def addToTail[E >: T](element: E): List[E] = Cons(size + 1, this.elem, tail.addToTail(element))
