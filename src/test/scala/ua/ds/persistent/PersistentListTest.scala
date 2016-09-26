@@ -173,5 +173,15 @@ class PersistentListTest extends FunSuite with Matchers {
 
         list.dropWhile()(e => e % 5 == 0) shouldBe emptyList
     }
+
+    test("fold on empty list should return the initial value") {
+        emptyList.fold(0)((acc, e) => acc - 1) shouldBe 0
+    }
+
+    test("should fold a list") {
+        val list = emptyList.addToHead(4).addToHead(5).addToHead(6)
+
+        list.fold(0)((acc, e) => acc + e) shouldBe 15
+    }
 }
 
