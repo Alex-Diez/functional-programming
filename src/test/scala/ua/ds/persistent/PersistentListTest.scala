@@ -71,20 +71,59 @@ class PersistentListTest extends FunSuite with Matchers {
         listOne.concatenate(listTwo).toIterator.toStream should contain inOrderOnly(30, 20, 10, 60, 50, 40)
     }
 
-    test("set head on empty list") {
+    test("set head to an empty list should add to head") {
         val changed = emptyList.setHead(10)
 
         changed.head shouldBe Some(10)
         changed.size shouldBe 1
     }
 
-    test("change head of a list") {
+    test("should change head of a list") {
         val baseline = emptyList.addToHead(10).addToHead(30)
 
         val changedHead = baseline.setHead(20)
 
         changedHead.head shouldBe Some(20)
+        changedHead.contains(30) shouldBe false
         changedHead.size shouldBe 2
+    }
+
+    test("drop 'n' elements from an empty list should return empty list") {
+        val dropped = emptyList.drop(10)
+
+        dropped.isEmpty shouldBe true
+    }
+
+    test("should drop the first element") {
+        val baseline = emptyList.addToHead(10).addToHead(20).addToHead(30)
+
+        val dropped = baseline.drop(1)
+
+        dropped.size shouldBe 2
+        dropped.contains(10) shouldBe true
+        dropped.contains(20) shouldBe true
+        dropped.contains(30) shouldBe false
+    }
+
+    test("should drop first 3 elements") {
+        val baseline = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
+
+        val dropped = baseline.drop(3)
+
+        dropped.size shouldBe 2
+        dropped.contains(10) shouldBe true
+        dropped.contains(20) shouldBe true
+        dropped.contains(30) shouldBe false
+        dropped.contains(40) shouldBe false
+        dropped.contains(50) shouldBe false
+    }
+
+    test("should return an empty list when drop more than size of the list") {
+        val baseline = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
+
+        val dropped = baseline.drop(10)
+
+        dropped.isEmpty shouldBe true
     }
 }
 
