@@ -183,5 +183,15 @@ class PersistentListTest extends FunSuite with Matchers {
 
         list.fold(0)((acc, e) => acc + e) shouldBe 15
     }
+
+    test("an empty list should map to another empty list") {
+        emptyList.map()(e => e.toString) shouldBe emptyList
+    }
+
+    test("should map list of int to list of string") {
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
+
+        list.map[String]()(e => e.toString).toIterator.toStream should contain inOrder("50", "40", "30", "20", "10")
+    }
 }
 

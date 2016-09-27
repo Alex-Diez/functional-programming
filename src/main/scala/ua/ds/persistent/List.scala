@@ -4,6 +4,13 @@ import scala.collection.AbstractIterator
 
 sealed trait List[+T] {
     self =>
+    def map[A]()(func: T => A): List[A] = {
+        this match {
+            case List.Nil => List.Nil
+            case List.Cons(size, elem, tail) => List.Cons(size, func(elem), tail.map()(func))
+        }
+    }
+
     def fold[E >: T](init: E)(func: (E, E) => E): E
 
     def dropWhile()(predicate: (T) => Boolean): List[T]
@@ -49,7 +56,6 @@ object List {
     def apply[T](): List[T] = Nil
 
     case object Nil extends List[Nothing] {
-
         override def fold[E >: Nothing](init: E)(func: (E, E) => E): E = init
 
         override def dropWhile()(predicate: (Nothing) => Boolean): List[Nothing] = this
@@ -74,7 +80,6 @@ object List {
     }
 
     final case class Cons[+T](size: Int, elem: T, tail: List[T]) extends List[T] {
-
         override def fold[E >: T](init: E)(func: (E, E) => E): E = {
             tail.fold(func(init, elem))(func)
         }
@@ -104,4 +109,5 @@ object List {
 
         override def head: Option[T] = Some(elem)
     }
+
 }
