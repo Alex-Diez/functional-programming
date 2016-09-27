@@ -1,9 +1,17 @@
 package ua.ds.persistent
 
+import scala.annotation.tailrec
 import scala.collection.AbstractIterator
 
 sealed trait List[+T] {
     self =>
+    def flatMap[A]()(map: T => List[A]): List[A] = {
+        this match {
+            case List.Nil => List.Nil
+            case List.Cons(_, elem, tail) => map(elem).concatenate(tail.flatMap()(map))
+        }
+    }
+
     def filter()(predicate: T => Boolean): List[T] = {
         this match {
             case List.Nil => List.Nil
@@ -64,6 +72,15 @@ sealed trait List[+T] {
 
 object List {
     def apply[T](): List[T] = Nil
+
+    def apply[T](seq: T*): List[T] = {
+        @tailrec
+        def iteration(iterator: Iterator[T], list: List[T]): List[T] = {
+            if (!iterator.hasNext) list
+            else iteration(iterator, list.addToHead(iterator.next()))
+        }
+        iteration(seq.reverseIterator, Nil)
+    }
 
     case object Nil extends List[Nothing] {
         override def fold[E >: Nothing](init: E)(func: (E, E) => E): E = init

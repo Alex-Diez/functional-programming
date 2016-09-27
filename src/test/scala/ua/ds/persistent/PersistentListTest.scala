@@ -99,6 +99,10 @@ class PersistentListTest extends FunSuite with Matchers {
         listOne.concatenate(listTwo).toIterator.toStream should contain inOrderOnly(30, 20, 10, 60, 50, 40)
     }
 
+    test("should produce list of elements") {
+        List(1, 2, 3, 4, 5).toIterator.toStream should contain inOrder(1, 2, 3, 4, 5)
+    }
+
     test("set head to an empty list should add to head") {
         val changed = emptyList.setHead(10)
 
@@ -209,6 +213,18 @@ class PersistentListTest extends FunSuite with Matchers {
             .addToHead(40)
 
         list.filter()(e => e % 10 == 0).toIterator.toStream should contain inOrder(40, 30, 20, 10)
+    }
+
+    test("flat map should return an empty list when called on another empty list") {
+        emptyList.flatMap()(e => List(e, e)) shouldBe emptyList
+    }
+
+    test("flat map should make a list from each element of given list and concatenate result") {
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
+
+        val flatMap = list.flatMap()(e => List(e, e, e))
+        flatMap.toIterator.toStream should contain theSameElementsAs Vector(50, 50, 50, 40, 40, 40, 30, 30, 30, 20, 20, 20, 10, 10, 10)
+        flatMap.size shouldBe list.size * 3
     }
 }
 
