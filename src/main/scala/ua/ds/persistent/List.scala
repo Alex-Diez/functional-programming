@@ -5,6 +5,13 @@ import scala.collection.AbstractIterator
 
 sealed trait List[+T] {
     self =>
+    def zipWith[E >: T](emptyList: List[E])(zipper: (E, E) => E): List[E] = {
+        (this, emptyList) match {
+            case (List.Cons(sizeFirst, elemFirst, tailFirst), List.Cons(sizeSecond, elemSecond, tailSecond)) => List.Cons(sizeFirst, zipper(elemFirst, elemSecond), tailFirst.zipWith(tailSecond)(zipper))
+            case (_, _) => List.Nil
+        }
+    }
+
     def flatMap[A]()(map: T => List[A]): List[A] = {
         this match {
             case List.Nil => List.Nil

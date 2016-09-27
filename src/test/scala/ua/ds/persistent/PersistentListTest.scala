@@ -226,5 +226,23 @@ class PersistentListTest extends FunSuite with Matchers {
         flatMap.toIterator.toStream should contain theSameElementsAs Vector(50, 50, 50, 40, 40, 40, 30, 30, 30, 20, 20, 20, 10, 10, 10)
         flatMap.size shouldBe list.size * 3
     }
+
+    test("zip an empty list with other empty list should produce an empty list") {
+        emptyList.zipWith(emptyList)((e1, e2) => e1 + e2) shouldBe emptyList
+    }
+
+    test("zip of two equal by length lists") {
+        val listOne = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
+        val listTwo = emptyList.addToHead(5).addToHead(15).addToHead(25).addToHead(35).addToHead(45)
+
+        listOne.zipWith(listTwo)((e1, e2) => e1 + e2).toIterator.toStream should contain inOrder (95, 75, 55, 35, 15)
+    }
+
+    test("zip shorter list with longer") {
+        val shorter = emptyList.addToHead(10).addToHead(20)
+        val longer = emptyList.addToHead(30).addToHead(40).addToHead(50).addToHead(60)
+
+        shorter.zipWith(longer)((s, l) => s + l).toIterator.toStream should contain inOrder(80, 60)
+    }
 }
 
