@@ -4,6 +4,16 @@ import scala.collection.AbstractIterator
 
 sealed trait List[+T] {
     self =>
+    def filter()(predicate: T => Boolean): List[T] = {
+        this match {
+            case List.Nil => List.Nil
+            case List.Cons(size, elem, tail) =>
+                val last = tail.filter()(predicate)
+                if (predicate(elem)) List.Cons(last.size + 1, elem, last)
+                else last
+        }
+    }
+
     def map[A]()(func: T => A): List[A] = {
         this match {
             case List.Nil => List.Nil

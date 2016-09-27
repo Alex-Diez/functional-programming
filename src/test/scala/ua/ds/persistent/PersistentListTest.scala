@@ -193,5 +193,22 @@ class PersistentListTest extends FunSuite with Matchers {
 
         list.map[String]()(e => e.toString).toIterator.toStream should contain inOrder("50", "40", "30", "20", "10")
     }
+
+    test("should return an empty list with filter on empty list") {
+        emptyList.filter()(e => e != 10) shouldBe emptyList
+    }
+
+    test("only divisible by 10 elements should be left") {
+        val list = emptyList
+            .addToHead(10)
+            .addToHead(15)
+            .addToHead(20)
+            .addToHead(25)
+            .addToHead(30)
+            .addToHead(35)
+            .addToHead(40)
+
+        list.filter()(e => e % 10 == 0).toIterator.toStream should contain inOrder(40, 30, 20, 10)
+    }
 }
 
