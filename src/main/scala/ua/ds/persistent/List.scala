@@ -5,8 +5,8 @@ import scala.collection.AbstractIterator
 
 sealed trait List[+T] {
     self =>
-    def zipWith[E >: T](emptyList: List[E])(zipper: (E, E) => E): List[E] = {
-        (this, emptyList) match {
+    def zipWith[E >: T](other: List[E])(zipper: (E, E) => E): List[E] = {
+        (this, other) match {
             case (List.Cons(sizeFirst, elemFirst, tailFirst), List.Cons(sizeSecond, elemSecond, tailSecond)) => List.Cons(sizeFirst, zipper(elemFirst, elemSecond), tailFirst.zipWith(tailSecond)(zipper))
             case (_, _) => List.Nil
         }
@@ -50,7 +50,7 @@ sealed trait List[+T] {
 
     def isEmpty: Boolean
 
-    def size(): Int
+    def size: Int
 
     def contains[E >: T](element: E): Boolean
 
@@ -66,13 +66,13 @@ sealed trait List[+T] {
             case List.Cons(_, elem, tail) => these = tail; elem
         }
 
-        override def hasNext: Boolean = these.size() != 0
+        override def hasNext: Boolean = these.size != 0
     }
 
     def concatenate[E >: T](other: List[E]): List[E] = {
         this match {
             case List.Nil => other
-            case List.Cons(size, elem, tail) => List.Cons(size + other.size(), elem, tail.concatenate(other))
+            case List.Cons(size, elem, tail) => List.Cons(size + other.size, elem, tail.concatenate(other))
         }
     }
 }
@@ -104,7 +104,7 @@ object List {
 
         override def isEmpty: Boolean = true
 
-        override def size(): Int = 0
+        override def size: Int = 0
 
         override def contains[E](element: E): Boolean = false
 
