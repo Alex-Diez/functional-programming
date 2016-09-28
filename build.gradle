@@ -71,9 +71,9 @@ dependencies {
 }
 
 jmh {
-    iterations = 5
-    benchmarkMode = ['thrpt']
-    warmupIterations = 5
+    iterations = 10
+    benchmarkMode = ['avgt']
+    warmupIterations = 10
     fork = 1
 }
 

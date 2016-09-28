@@ -13,7 +13,7 @@ sealed trait Stack[+T] {
         def collect(frame: Stack[T], list: List[T]): List[T] = {
             frame.peek match {
                 case None => list
-                case Some(v) => collect(frame.pop(), list).addToHead(v)
+                case Some(v) => v +: collect(frame.pop(), list)
             }
         }
 

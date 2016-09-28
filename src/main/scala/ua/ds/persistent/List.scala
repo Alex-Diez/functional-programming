@@ -30,10 +30,25 @@ sealed trait List[+T] {
     }
 
     def map[A]()(func: T => A): List[A] = {
-        this match {
-            case List.Nil => List.Nil
-            case List.Cons(size, elem, tail) => List.Cons(size, func(elem), tail.map()(func))
+
+        //            Benchmark                         Mode  Cnt  Score   Error  Units
+        //            ListBenchmarks.mapLargeList       avgt    5  0.488 ± 0.358  ms/op
+        //            ListBenchmarks.mapMediumList      avgt    5  0.057 ± 0.084  ms/op
+        //            ListBenchmarks.mapSmallList       avgt    5  4.218 ± 3.359  us/op
+        //            sdk.ListBenchmarks.mapLargeList   avgt    5  0.494 ± 0.488  ms/op
+        //            sdk.ListBenchmarks.mapMediumList  avgt    5  0.034 ± 0.003  ms/op
+        //            sdk.ListBenchmarks.mapSmallList   avgt    5  4.035 ± 3.412  us/op
+
+        @tailrec
+        @inline
+        def loop(origin: List[T], created: List[A]): List[A] = {
+            origin match {
+                case List.Nil => created
+                case List.Cons(_, elem, tail) => loop(tail, func(elem) +: created)
+            }
         }
+
+        loop(this, List.Nil)
     }
 
     def fold[E >: T](init: E)(func: (E, E) => E): E
@@ -44,7 +59,7 @@ sealed trait List[+T] {
 
     def setHead[E >: T](element: E): List[E]
 
-    def addToHead[E >: T](element: E): List[E]
+    def +:[E >: T](element: E): List[E]
 
     def addToTail[E >: T](element: E): List[E]
 
@@ -81,12 +96,17 @@ object List {
     def apply[T](): List[T] = Nil
 
     def apply[T](seq: T*): List[T] = {
-        @tailrec
-        def iteration(iterator: Iterator[T], list: List[T]): List[T] = {
-            if (!iterator.hasNext) list
-            else iteration(iterator, list.addToHead(iterator.next()))
-        }
-        iteration(seq.reverseIterator, Nil)
+        iteration[T](seq.reverseIterator, Nil)
+    }
+
+    def apply(range: Range): List[Int] = {
+        iteration[Int](range.reverseIterator, Nil)
+    }
+
+    @tailrec
+    private def iteration[T](iterator: Iterator[T], list: List[T]): List[T] = {
+        if (!iterator.hasNext) list
+        else iteration(iterator, iterator.next() +: list)
     }
 
     case object Nil extends List[Nothing] {
@@ -96,9 +116,9 @@ object List {
 
         override def drop(size: Int): List[Nothing] = this
 
-        override def setHead[E >: Nothing](element: E): List[E] = addToHead(element)
+        override def setHead[E >: Nothing](element: E): List[E] = +:(element)
 
-        override def addToHead[E](element: E): List[E] = Cons(1, element, Nil)
+        override def +:[E](element: E): List[E] = Cons(1, element, Nil)
 
         override def addToTail[E >: Nothing](element: E): List[E] = List.Cons(1, element, List.Nil)
 
@@ -130,7 +150,7 @@ object List {
 
         override def setHead[E >: T](element: E): List[E] = Cons(size, element, tail)
 
-        override def addToHead[E >: T](element: E): List[E] = Cons(size + 1, element, this)
+        override def +:[E >: T](element: E): List[E] = Cons(size + 1, element, this)
 
         override def addToTail[E >: T](element: E): List[E] = Cons(size + 1, this.elem, tail.addToTail(element))
 

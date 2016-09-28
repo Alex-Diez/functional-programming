@@ -1,14 +1,31 @@
 package ua.ds.persistent
 
-import org.openjdk.jmh.annotations.{Benchmark, Scope, State}
+import java.util.concurrent.TimeUnit
+
+import org.openjdk.jmh.annotations.{Benchmark, OutputTimeUnit, Scope, State}
 
 @State(Scope.Benchmark)
 class ListBenchmarks {
 
-    val list: List[Int] = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
+    val smallList: List[Int] = List(0 until 100)
+    val mediumList: List[Int] = List(0 until 1000)
+    val largeList: List[Int] = List(0 until 10000)
 
     @Benchmark
-    def mapList(): List[String] = {
-        list.map[String]()(e => e.toString)
+    @OutputTimeUnit(TimeUnit.MICROSECONDS)
+    def mapSmallList(): List[String] = {
+        smallList.map()(e => e.toString)
+    }
+
+    @Benchmark
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    def mapMediumList(): List[String] = {
+        mediumList.map()(e => e.toString)
+    }
+
+    @Benchmark
+    @OutputTimeUnit(TimeUnit.MILLISECONDS)
+    def mapLargeList(): List[String] = {
+        largeList.map()(e => e.toString)
     }
 }
