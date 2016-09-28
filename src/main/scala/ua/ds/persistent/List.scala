@@ -1,54 +1,92 @@
 package ua.ds.persistent
 
+
 import scala.annotation.tailrec
 import scala.collection.AbstractIterator
+import scala.collection.mutable.ArrayBuffer
 
 sealed trait List[+T] {
     self =>
+
+    import ua.ds.persistent.List._
+
     def zipWith[E >: T](other: List[E])(zipper: (E, E) => E): List[E] = {
-        (this, other) match {
-            case (List.Cons(sizeFirst, elemFirst, tailFirst), List.Cons(sizeSecond, elemSecond, tailSecond)) => List.Cons(sizeFirst, zipper(elemFirst, elemSecond), tailFirst.zipWith(tailSecond)(zipper))
-            case (_, _) => List.Nil
+
+//            Benchmark                               Mode  Cnt    Score    Error  Units
+//            ListBenchmarks.zipLargeLists            avgt   10  175.325 ±  3.684  us/op
+//            ListBenchmarks.zipMediumLists           avgt   10   17.864 ±  0.465  us/op
+//            ListBenchmarks.zipSmallLists            avgt   10    1.783 ±  0.120  us/op
+
+        val buffer: ArrayBuffer[E] = new ArrayBuffer(size)
+
+        @tailrec
+        @inline
+        def loop(origin: List[E], other: List[E]): List[E] = {
+            (origin, other) match {
+                case (Cons(_, elem1, originTail), Cons(_, elem2, otherTail)) => buffer += zipper(elem1, elem2); loop(originTail, otherTail)
+                case (_, _) => Nil
+            }
         }
+
+        loop(this, other)
+        var counter = size - 1
+        var result: List[E] = Nil
+        while (counter > -1) {
+            result = buffer(counter) +: result
+            counter -= 1
+        }
+
+        result
     }
 
     def flatMap[A]()(map: T => List[A]): List[A] = {
         this match {
-            case List.Nil => List.Nil
-            case List.Cons(_, elem, tail) => map(elem).concatenate(tail.flatMap()(map))
+            case Nil => Nil
+            case Cons(_, elem, tail) => map(elem).concatenate(tail.flatMap()(map))
         }
     }
 
     def filter()(predicate: T => Boolean): List[T] = {
         this match {
-            case List.Nil => List.Nil
-            case List.Cons(size, elem, tail) =>
+            case Nil => Nil
+            case Cons(size, elem, tail) =>
                 val last = tail.filter()(predicate)
-                if (predicate(elem)) List.Cons(last.size + 1, elem, last)
+                if (predicate(elem)) Cons(last.size + 1, elem, last)
                 else last
         }
     }
 
     def map[A]()(func: T => A): List[A] = {
+//            Benchmark                               Mode  Cnt    Score    Error  Units
+//            ListBenchmarks.mapLargeList             avgt   10  466.244 ± 36.919  us/op
+//            ListBenchmarks.mapMediumList            avgt   10   42.511 ±  6.463  us/op
+//            ListBenchmarks.mapSmallList             avgt   10    3.389 ±  0.204  us/op
+//            baselines.ListBenchmarks.mapLargeList   avgt   10  399.827 ± 92.069  us/op
+//            baselines.ListBenchmarks.mapMediumList  avgt   10   34.289 ±  2.212  us/op
+//            baselines.ListBenchmarks.mapSmallList   avgt   10    3.188 ±  0.205  us/op
 
-        //            Benchmark                         Mode  Cnt  Score   Error  Units
-        //            ListBenchmarks.mapLargeList       avgt    5  0.488 ± 0.358  ms/op
-        //            ListBenchmarks.mapMediumList      avgt    5  0.057 ± 0.084  ms/op
-        //            ListBenchmarks.mapSmallList       avgt    5  4.218 ± 3.359  us/op
-        //            sdk.ListBenchmarks.mapLargeList   avgt    5  0.494 ± 0.488  ms/op
-        //            sdk.ListBenchmarks.mapMediumList  avgt    5  0.034 ± 0.003  ms/op
-        //            sdk.ListBenchmarks.mapSmallList   avgt    5  4.035 ± 3.412  us/op
+        val buffer: ArrayBuffer[A] = new ArrayBuffer(size)
 
         @tailrec
         @inline
-        def loop(origin: List[T], created: List[A]): List[A] = {
+        def loop(origin: List[T]): List[A] = {
             origin match {
-                case List.Nil => created
-                case List.Cons(_, elem, tail) => loop(tail, func(elem) +: created)
+                case Cons(_, elem, tail) =>
+                    buffer += func(elem)
+                    loop(tail)
+                case _ => Nil
             }
         }
 
-        loop(this, List.Nil)
+        loop(this)
+        var counter = size - 1
+        var result: List[A] = Nil
+        while (counter > -1) {
+            result = buffer(counter) +: result
+            counter -= 1
+        }
+
+        result
     }
 
     def fold[E >: T](init: E)(func: (E, E) => E): E
@@ -77,8 +115,8 @@ sealed trait List[+T] {
         var these = self
 
         override def next(): T = these match {
-            case List.Nil => throw new NoSuchElementException
-            case List.Cons(_, elem, tail) => these = tail; elem
+            case Nil => throw new NoSuchElementException
+            case Cons(_, elem, tail) => these = tail; elem
         }
 
         override def hasNext: Boolean = these.size != 0
@@ -86,8 +124,8 @@ sealed trait List[+T] {
 
     def concatenate[E >: T](other: List[E]): List[E] = {
         this match {
-            case List.Nil => other
-            case List.Cons(size, elem, tail) => List.Cons(size + other.size, elem, tail.concatenate(other))
+            case Nil => other
+            case Cons(size, elem, tail) => Cons(size + other.size, elem, tail.concatenate(other))
         }
     }
 }

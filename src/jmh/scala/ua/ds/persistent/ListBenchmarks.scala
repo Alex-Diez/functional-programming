@@ -5,27 +5,43 @@ import java.util.concurrent.TimeUnit
 import org.openjdk.jmh.annotations.{Benchmark, OutputTimeUnit, Scope, State}
 
 @State(Scope.Benchmark)
+@OutputTimeUnit(TimeUnit.MICROSECONDS)
 class ListBenchmarks {
 
-    val smallList: List[Int] = List(0 until 100)
-    val mediumList: List[Int] = List(0 until 1000)
-    val largeList: List[Int] = List(0 until 10000)
+    val firstSmallList = List(0 until 100)
+    val secondSmallList = List(300 until 400)
+    val firstMediumList = List(0 until 1000)
+    val secondMediumList = List(3000 until 4000)
+    val firstLargeList = List(0 until 10000)
+    val secondLargeList = List(30000 until 40000)
 
     @Benchmark
-    @OutputTimeUnit(TimeUnit.MICROSECONDS)
     def mapSmallList(): List[String] = {
-        smallList.map()(e => e.toString)
+        firstSmallList.map()(e => e.toString)
     }
 
     @Benchmark
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     def mapMediumList(): List[String] = {
-        mediumList.map()(e => e.toString)
+        firstMediumList.map()(e => e.toString)
     }
 
     @Benchmark
-    @OutputTimeUnit(TimeUnit.MILLISECONDS)
     def mapLargeList(): List[String] = {
-        largeList.map()(e => e.toString)
+        firstLargeList.map()(e => e.toString)
+    }
+
+    @Benchmark
+    def zipSmallLists(): List[Int] = {
+        firstSmallList.zipWith(secondSmallList)((e1, e2) => e1 + e2)
+    }
+
+    @Benchmark
+    def zipMediumLists(): List[Int] = {
+        firstMediumList.zipWith(secondMediumList)((e1, e2) => e1 + e2)
+    }
+
+    @Benchmark
+    def zipLargeLists(): List[Int] = {
+        firstLargeList.zipWith(secondLargeList)((e1, e2) => e1 + e2)
     }
 }
