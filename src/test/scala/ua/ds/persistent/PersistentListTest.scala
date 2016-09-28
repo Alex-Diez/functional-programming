@@ -19,7 +19,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("the head of not empty list is last added value") {
-        val list = 10 +: emptyList
+        val list = emptyList.addToHead(10)
 
         list.head shouldBe Some(10)
     }
@@ -29,40 +29,40 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("the tail of 1 element is an empty list") {
-        val list = 10 +: emptyList
+        val list = emptyList.addToHead(10)
 
         list.tail shouldBe emptyList
     }
 
     test("the tail of list is a list without head") {
-        val tail = 40 +: 30 +: 20 +: 10 +: emptyList
+        val tail = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40)
 
-        val list = 50 +: tail
+        val list = tail.addToHead(50)
 
         list.tail shouldBe tail
     }
 
     test("list's size is growing when add new element") {
-        val list = 1 +: emptyList
+        val list = emptyList.addToHead(1)
 
         list.size shouldBe 1
         list.isEmpty shouldBe false
     }
 
     test("list should contain added value") {
-        val list = 10 +: emptyList
+        val list = emptyList.addToHead(10)
 
         list.contains(10) shouldBe true
     }
 
     test("list should not contain not added value") {
-        val list = 20 +: emptyList
+        val list = emptyList.addToHead(20)
 
         list.contains(10) shouldBe false
     }
 
     test("list should contain all added values") {
-        val list = 40 +: 30 +: 20 +: 10 +: emptyList
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40)
 
         list.contains(10) shouldBe true
         list.contains(20) shouldBe true
@@ -78,20 +78,23 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("element should be added to the end of list") {
-        val list = (10 +: emptyList).addToTail(20)
+        val list = emptyList.addToHead(10).addToTail(20)
 
         list.head shouldBe Some(10)
     }
 
     test("iterator should be in order") {
-        val list = 40 +: 30 +: 20 +: 10 +: emptyList
+        val list = emptyList.addToHead(10)
+            .addToHead(20)
+            .addToHead(30)
+            .addToHead(40)
 
         list.toIterator.toStream should contain inOrderOnly(40, 30, 20, 10)
     }
 
     test("lists should be concatenated") {
-        val listOne = 30 +: 20 +: 10 +: emptyList
-        val listTwo = 60 +: 50 +: 40 +: emptyList
+        val listOne = emptyList.addToHead(10).addToHead(20).addToHead(30)
+        val listTwo = emptyList.addToHead(40).addToHead(50).addToHead(60)
 
         listOne.concatenate(listTwo).toIterator.toStream should contain inOrderOnly(30, 20, 10, 60, 50, 40)
     }
@@ -108,7 +111,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should change head of a list") {
-        val baseline = 30 +: 10 +: emptyList
+        val baseline = emptyList.addToHead(10).addToHead(30)
 
         val changedHead = baseline.setHead(20)
 
@@ -124,7 +127,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should drop the first element") {
-        val baseline = 30 +: 20 +: 10 +: emptyList
+        val baseline = emptyList.addToHead(10).addToHead(20).addToHead(30)
 
         val dropped = baseline.drop(1)
 
@@ -135,7 +138,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should drop first 3 elements") {
-        val baseline = 50 +: 40 +: 30 +: 20 +: 10 +: emptyList
+        val baseline = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
 
         val dropped = baseline.drop(3)
 
@@ -148,7 +151,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should return an empty list when drop more than size of the list") {
-        val baseline = 50 +: 40 +: 30 +: 20 +: 10 +: emptyList
+        val baseline = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
 
         val dropped = baseline.drop(10)
 
@@ -160,7 +163,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should drop while element more than 30") {
-        val list = 50 +: 40 +: 30 +: 20 +: 10 +: emptyList
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
 
         val dropped = list.dropWhile()(e => e > 30)
 
@@ -170,7 +173,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should drop whole list when predicate is true for all elements in the list") {
-        val list = 35 +: 20 +: 15 +: 10 +: emptyList
+        val list = emptyList.addToHead(10).addToHead(15).addToHead(20).addToHead(35)
 
         list.dropWhile()(e => e % 5 == 0) shouldBe emptyList
     }
@@ -180,7 +183,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should fold a list") {
-        val list = 6 +: 5 +: 4 +: emptyList
+        val list = emptyList.addToHead(4).addToHead(5).addToHead(6)
 
         list.fold(0)((acc, e) => acc + e) shouldBe 15
     }
@@ -190,7 +193,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("should map list of int to list of string") {
-        val list = 50 +: 40 +: 30 +: 20 +: 10 +: emptyList
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
 
         list.map[String]()(e => e.toString).toIterator.toStream should contain inOrder("50", "40", "30", "20", "10")
     }
@@ -200,7 +203,14 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("only divisible by 10 elements should be left") {
-        val list = 40 +: 35 +: 30 +: 25 +: 20 +: 15 +: 10 +: emptyList
+        val list = emptyList
+            .addToHead(10)
+            .addToHead(15)
+            .addToHead(20)
+            .addToHead(25)
+            .addToHead(30)
+            .addToHead(35)
+            .addToHead(40)
 
         list.filter()(e => e % 10 == 0).toIterator.toStream should contain inOrder(40, 30, 20, 10)
     }
@@ -210,7 +220,7 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("flat map should make a list from each element of given list and concatenate result") {
-        val list = 50 +: 40 +: 30 +: 20 +: 10 +: emptyList
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
 
         val flatMap = list.flatMap()(e => List(e, e, e))
         flatMap.toIterator.toStream should contain theSameElementsAs Vector(50, 50, 50, 40, 40, 40, 30, 30, 30, 20, 20, 20, 10, 10, 10)
@@ -222,15 +232,15 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("zip of two equal by length lists") {
-        val listOne = 50 +: 40 +: 30 +: 20 +: 10 +: emptyList
-        val listTwo = 45 +: 35 +: 25 +: 15 +: 5 +: emptyList
+        val listOne = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
+        val listTwo = emptyList.addToHead(5).addToHead(15).addToHead(25).addToHead(35).addToHead(45)
 
         listOne.zipWith(listTwo)((e1, e2) => e1 + e2).toIterator.toStream should contain inOrder(95, 75, 55, 35, 15)
     }
 
     test("zip shorter list with longer") {
-        val shorter = 20 +: 10 +: emptyList
-        val longer = 60 +: 50 +: 40 +: 30 +: emptyList
+        val shorter = emptyList.addToHead(10).addToHead(20)
+        val longer = emptyList.addToHead(30).addToHead(40).addToHead(50).addToHead(60)
 
         shorter.zipWith(longer)((s, l) => s + l).toIterator.toStream should contain inOrder(80, 60)
     }

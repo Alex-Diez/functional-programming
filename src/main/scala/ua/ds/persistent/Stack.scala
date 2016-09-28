@@ -13,7 +13,7 @@ sealed trait Stack[+T] {
         def collect(frame: Stack[T], list: List[T]): List[T] = {
             frame.peek match {
                 case None => list
-                case Some(v) => v +: collect(frame.pop(), list)
+                case Some(v) => collect(frame.pop(), list) addToHead v
             }
         }
 
@@ -54,4 +54,5 @@ object Stack {
     final case class Frame[T](size: Int, element: T, pop: Stack[T]) extends Stack[T] {
         override def peek: Option[T] = Some(element)
     }
+
 }

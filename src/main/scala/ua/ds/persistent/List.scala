@@ -32,7 +32,7 @@ sealed trait List[+T] {
         var counter = size - 1
         var result: List[E] = Nil
         while (counter > -1) {
-            result = buffer(counter) +: result
+            result = result.addToHead(buffer(counter))
             counter -= 1
         }
 
@@ -82,7 +82,7 @@ sealed trait List[+T] {
         var counter = size - 1
         var result: List[A] = Nil
         while (counter > -1) {
-            result = buffer(counter) +: result
+            result = result.addToHead(buffer(counter))
             counter -= 1
         }
 
@@ -97,7 +97,7 @@ sealed trait List[+T] {
 
     def setHead[E >: T](element: E): List[E]
 
-    def +:[E >: T](element: E): List[E]
+    def addToHead[E >: T](element: E): List[E]
 
     def addToTail[E >: T](element: E): List[E]
 
@@ -144,7 +144,7 @@ object List {
     @tailrec
     private def iteration[T](iterator: Iterator[T], list: List[T]): List[T] = {
         if (!iterator.hasNext) list
-        else iteration(iterator, iterator.next() +: list)
+        else iteration(iterator, list.addToHead(iterator.next()))
     }
 
     case object Nil extends List[Nothing] {
@@ -154,9 +154,9 @@ object List {
 
         override def drop(size: Int): List[Nothing] = this
 
-        override def setHead[E >: Nothing](element: E): List[E] = +:(element)
+        override def setHead[E >: Nothing](element: E): List[E] = addToHead(element)
 
-        override def +:[E](element: E): List[E] = Cons(1, element, Nil)
+        override def addToHead[E](element: E): List[E] = Cons(1, element, Nil)
 
         override def addToTail[E >: Nothing](element: E): List[E] = List.Cons(1, element, List.Nil)
 
@@ -188,7 +188,7 @@ object List {
 
         override def setHead[E >: T](element: E): List[E] = Cons(size, element, tail)
 
-        override def +:[E >: T](element: E): List[E] = Cons(size + 1, element, this)
+        override def addToHead[E >: T](element: E): List[E] = Cons(size + 1, element, this)
 
         override def addToTail[E >: T](element: E): List[E] = Cons(size + 1, this.elem, tail.addToTail(element))
 
