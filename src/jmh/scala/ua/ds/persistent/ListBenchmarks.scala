@@ -44,4 +44,19 @@ class ListBenchmarks {
     def zipLargeLists(): List[Int] = {
         firstLargeList.zipWith(secondLargeList)((e1, e2) => e1 + e2)
     }
+
+    @Benchmark
+    def filterSmallList(): List[Int] = {
+        firstSmallList.filter()(e => e % 10 == 0)
+    }
+
+    @Benchmark
+    def filterMediumList(): List[Int] = {
+        firstMediumList.filter()(e => e % 10 == 0)
+    }
+
+    @Benchmark
+    def filterLargeList(): List[Int] = {
+        firstLargeList.filter()(e => e % 10 == 0)
+    }
 }

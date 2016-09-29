@@ -26,4 +26,19 @@ class ListBenchmarks {
     def mapLargeList(): List[String] = {
         largeList.map(e => e.toString)
     }
+
+    @Benchmark
+    def filterSmallList(): List[Int] = {
+        smallList.filter(e => e % 10 == 0)
+    }
+
+    @Benchmark
+    def filterMediumList(): List[Int] = {
+        mediumList.filter(e => e % 10 == 0)
+    }
+
+    @Benchmark
+    def filterLargeList(): List[Int] = {
+        largeList.filter(e => e % 10 == 0)
+    }
 }

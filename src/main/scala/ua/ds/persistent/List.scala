@@ -1,6 +1,5 @@
 package ua.ds.persistent
 
-
 import scala.annotation.tailrec
 import scala.collection.AbstractIterator
 import scala.collection.mutable.ArrayBuffer
@@ -12,24 +11,17 @@ sealed trait List[+T] {
 
     def zipWith[E >: T](other: List[E])(zipper: (E, E) => E): List[E] = {
 
-//            Benchmark                               Mode  Cnt    Score    Error  Units
-//            ListBenchmarks.zipLargeLists            avgt   10  175.325 ±  3.684  us/op
-//            ListBenchmarks.zipMediumLists           avgt   10   17.864 ±  0.465  us/op
-//            ListBenchmarks.zipSmallLists            avgt   10    1.783 ±  0.120  us/op
+        val buffer = new ArrayBuffer[E](size)
 
-        val buffer: ArrayBuffer[E] = new ArrayBuffer(size)
-
-        @tailrec
-        @inline
-        def loop(origin: List[E], other: List[E]): List[E] = {
-            (origin, other) match {
-                case (Cons(_, elem1, originTail), Cons(_, elem2, otherTail)) => buffer += zipper(elem1, elem2); loop(originTail, otherTail)
-                case (_, _) => Nil
-            }
+        var originList = this
+        var otherList = other
+        while (!originList.isEmpty && !other.isEmpty) {
+            buffer += zipper(originList.head.get, otherList.head.get)
+            originList = originList.tail
+            otherList = otherList.tail
         }
 
-        loop(this, other)
-        var counter = size - 1
+        var counter = buffer.length - 1
         var result: List[E] = Nil
         while (counter > -1) {
             result = result.addToHead(buffer(counter))
@@ -47,38 +39,36 @@ sealed trait List[+T] {
     }
 
     def filter()(predicate: T => Boolean): List[T] = {
-        this match {
-            case Nil => Nil
-            case Cons(size, elem, tail) =>
-                val last = tail.filter()(predicate)
-                if (predicate(elem)) Cons(last.size + 1, elem, last)
-                else last
+
+        val buffer = new ArrayBuffer[T](size)
+
+        var list = this
+        while (!list.isEmpty) {
+            if (predicate(list.head.get)) buffer += list.head.get
+
+            list = list.tail
         }
+
+        var index = buffer.length - 1
+        var result: List[T] = Nil
+        while (index > -1) {
+            result = result.addToHead(buffer(index))
+            index -= 1
+        }
+
+        result
     }
 
     def map[A]()(func: T => A): List[A] = {
-//            Benchmark                               Mode  Cnt    Score    Error  Units
-//            ListBenchmarks.mapLargeList             avgt   10  466.244 ± 36.919  us/op
-//            ListBenchmarks.mapMediumList            avgt   10   42.511 ±  6.463  us/op
-//            ListBenchmarks.mapSmallList             avgt   10    3.389 ±  0.204  us/op
-//            baselines.ListBenchmarks.mapLargeList   avgt   10  399.827 ± 92.069  us/op
-//            baselines.ListBenchmarks.mapMediumList  avgt   10   34.289 ±  2.212  us/op
-//            baselines.ListBenchmarks.mapSmallList   avgt   10    3.188 ±  0.205  us/op
 
-        val buffer: ArrayBuffer[A] = new ArrayBuffer(size)
+        val buffer = new ArrayBuffer[A](size)
 
-        @tailrec
-        @inline
-        def loop(origin: List[T]): List[A] = {
-            origin match {
-                case Cons(_, elem, tail) =>
-                    buffer += func(elem)
-                    loop(tail)
-                case _ => Nil
-            }
+        var list = this
+        while (list.size > 0) {
+            buffer += func(list.head.get)
+            list = list.tail
         }
 
-        loop(this)
         var counter = size - 1
         var result: List[A] = Nil
         while (counter > -1) {
