@@ -9,11 +9,6 @@ class PersistentListTest extends FunSuite with Matchers {
 
     val emptyList = List[Int]()
 
-    test("empty list has size 0") {
-        emptyList.size shouldBe 0
-        emptyList.isEmpty shouldBe true
-    }
-
     test("the head of an empty list is None") {
         emptyList.head shouldBe None
     }
@@ -45,7 +40,6 @@ class PersistentListTest extends FunSuite with Matchers {
     test("list's size is growing when add new element") {
         val list = emptyList.addToHead(1)
 
-        list.size shouldBe 1
         list.isEmpty shouldBe false
     }
 
@@ -73,7 +67,7 @@ class PersistentListTest extends FunSuite with Matchers {
     test("element should be added to empty list") {
         val list = emptyList.addToTail(20)
 
-        list.size shouldBe 1
+        list.isEmpty shouldBe false
         list.contains(20) shouldBe true
     }
 
@@ -107,7 +101,7 @@ class PersistentListTest extends FunSuite with Matchers {
         val changed = emptyList.setHead(10)
 
         changed.head shouldBe Some(10)
-        changed.size shouldBe 1
+        changed.isEmpty shouldBe false
     }
 
     test("should change head of a list") {
@@ -117,7 +111,6 @@ class PersistentListTest extends FunSuite with Matchers {
 
         changedHead.head shouldBe Some(20)
         changedHead.contains(30) shouldBe false
-        changedHead.size shouldBe 2
     }
 
     test("drop 'n' elements from an empty list should return empty list") {
@@ -131,7 +124,6 @@ class PersistentListTest extends FunSuite with Matchers {
 
         val dropped = baseline.drop(1)
 
-        dropped.size shouldBe 2
         dropped.contains(10) shouldBe true
         dropped.contains(20) shouldBe true
         dropped.contains(30) shouldBe false
@@ -142,7 +134,6 @@ class PersistentListTest extends FunSuite with Matchers {
 
         val dropped = baseline.drop(3)
 
-        dropped.size shouldBe 2
         dropped.contains(10) shouldBe true
         dropped.contains(20) shouldBe true
         dropped.contains(30) shouldBe false
@@ -195,7 +186,7 @@ class PersistentListTest extends FunSuite with Matchers {
     test("should map list of int to list of string") {
         val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40).addToHead(50)
 
-        list.map[String]()(e => e.toString).toIterator.toStream should contain inOrder("50", "40", "30", "20", "10")
+        list.map()(e => e.toString).toIterator.toStream should contain inOrder("50", "40", "30", "20", "10")
     }
 
     test("should return an empty list with filter on empty list") {
@@ -224,7 +215,6 @@ class PersistentListTest extends FunSuite with Matchers {
 
         val flatMap = list.flatMap()(e => List(e, e, e))
         flatMap.toIterator.toStream should contain theSameElementsAs Vector(50, 50, 50, 40, 40, 40, 30, 30, 30, 20, 20, 20, 10, 10, 10)
-        flatMap.size shouldBe list.size * 3
     }
 
     test("zip an empty list with other empty list should produce an empty list") {
@@ -251,6 +241,14 @@ class PersistentListTest extends FunSuite with Matchers {
 
     test("should create list of integers from a range") {
         List(0 until 10).toIterator.toStream should contain inOrder(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
+    }
+
+    test("an empty list should be reversed to itself") {
+        emptyList.reverse shouldBe emptyList
+    }
+
+    test("reversed list should be in reverse order") {
+        List(0 until 10).reverse.toIterator.toStream should contain inOrderOnly(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
     }
 }
 

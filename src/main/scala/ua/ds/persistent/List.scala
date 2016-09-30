@@ -2,89 +2,35 @@ package ua.ds.persistent
 
 import scala.annotation.tailrec
 import scala.collection.AbstractIterator
-import scala.collection.mutable.ArrayBuffer
 
 sealed trait List[+T] {
     self =>
 
     import ua.ds.persistent.List._
 
-    def map[A]()(func: T => A): List[A] = {
-        iterate()(func, e => true)
-    }
+    def reverse: List[T] = fold(Nil: List[T])((acc, e) => Cons(e, acc))
 
-    def filter()(predicate: T => Boolean): List[T] = {
-        iterate()(e => e, predicate)
-    }
+    def map[A]()(func: T => A): List[A] = reverse.fold(Nil: List[A])((acc, e) => acc.addToHead(func(e)))
 
-    private def iterate[A]()(func: T => A, predicate: T => Boolean): List[A] = {
-        val buffer = new ArrayBuffer[A](size)
+    def filter()(predicate: T => Boolean): List[T] = reverse.fold(Nil: List[T])((acc, e) => if (predicate(e)) acc.addToHead(e) else acc)
 
-        var list = this
-        while (list.size > 0) {
-            if (predicate(list.head.get)) buffer += func(list.head.get)
-            list = list.tail
+    def flatMap[A]()(map: T => List[A]): List[A] = reverse.fold(Nil: List[A])((acc, e) => map(e).concatenate(acc))
+
+    def zipWith[E >: T, A, B](other: List[A])(zipper: (E, A) => B): List[B] = {
+        var result: List[B] = Nil
+        val these = this.toIterator
+        val those = other.toIterator
+        while (these.hasNext && those.hasNext) {
+            result = result.addToHead(zipper(these.next(), those.next()))
         }
-
-        var counter = buffer.length - 1
-        var result: List[A] = Nil
-        while (counter > -1) {
-            result = result.addToHead(buffer(counter))
-            counter -= 1
-        }
-
-        result
-    }
-
-    def flatMap[A]()(map: T => List[A]): List[A] = {
-
-        val buffer = new ArrayBuffer[List[A]](size)
-
-        var list = this
-        while (!list.isEmpty) {
-            buffer += map(list.head.get)
-            list = list.tail
-        }
-
-        var counter = buffer.length - 1
-        var result: List[A] = Nil
-        while (counter > -1) {
-            result = buffer(counter).concatenate(result)
-            counter -= 1
-        }
-
-        result
-    }
-
-    def zipWith[E >: T](other: List[E])(zipper: (E, E) => E): List[E] = {
-
-        val buffer = new ArrayBuffer[E](size)
-
-        var originList = this
-        var otherList = other
-        while (!originList.isEmpty && !other.isEmpty) {
-            buffer += zipper(originList.head.get, otherList.head.get)
-            originList = originList.tail
-            otherList = otherList.tail
-        }
-
-        var counter = buffer.length - 1
-        var result: List[E] = Nil
-        while (counter > -1) {
-            result = result.addToHead(buffer(counter))
-            counter -= 1
-        }
-
-        result
+        result.reverse
     }
 
     @tailrec
     @inline
-    final def fold[E >: T](init: E)(func: (E, E) => E): E = {
-        this match {
-            case Nil => init
-            case Cons(size, elem, tail) => tail.fold(func(init, elem))(func)
-        }
+    final def fold[A](init: A)(func: (A, T) => A): A = this match {
+        case Nil => init
+        case Cons(elem, tail) => tail.fold(func(init, elem))(func)
     }
 
     def dropWhile()(predicate: (T) => Boolean): List[T]
@@ -99,8 +45,6 @@ sealed trait List[+T] {
 
     def isEmpty: Boolean
 
-    def size: Int
-
     def contains[E >: T](element: E): Boolean
 
     def head: Option[T]
@@ -112,32 +56,13 @@ sealed trait List[+T] {
 
         override def next(): T = these match {
             case Nil => throw new NoSuchElementException
-            case Cons(_, elem, tail) => these = tail; elem
+            case Cons(elem, tail) => these = tail; elem
         }
 
-        override def hasNext: Boolean = these.size != 0
+        override def hasNext: Boolean = !these.isEmpty
     }
 
-    def concatenate[E >: T](other: List[E]): List[E] = {
-
-        val buffer = new ArrayBuffer[E](size)
-
-        var list = this
-        while (!list.isEmpty) {
-            buffer += list.head.get
-            list = list.tail
-        }
-
-        var counter = buffer.length - 1
-        var result = other
-        while (counter > -1) {
-            result = result.addToHead(buffer(counter))
-            counter -= 1
-        }
-
-        result
-
-    }
+    def concatenate[E >: T](other: List[E]): List[E] = reverse.fold(other)((acc, e) => acc.addToHead(e))
 }
 
 object List {
@@ -152,34 +77,33 @@ object List {
     }
 
     @tailrec
+    @inline
     private def iteration[T](iterator: Iterator[T], list: List[T]): List[T] = {
         if (!iterator.hasNext) list
         else iteration(iterator, list.addToHead(iterator.next()))
     }
 
     case object Nil extends List[Nothing] {
-        override def dropWhile()(predicate: (Nothing) => Boolean): List[Nothing] = this
+        override def dropWhile()(predicate: (Nothing) => Boolean): List[Nothing] = Nil
 
-        override def drop(size: Int): List[Nothing] = this
+        override def drop(size: Int): List[Nothing] = Nil
 
         override def setHead[E >: Nothing](element: E): List[E] = addToHead(element)
 
-        override def addToHead[E](element: E): List[E] = Cons(1, element, Nil)
+        override def addToHead[E](element: E): List[E] = Cons(element, Nil)
 
-        override def addToTail[E >: Nothing](element: E): List[E] = List.Cons(1, element, List.Nil)
+        override def addToTail[E >: Nothing](element: E): List[E] = Cons(element, Nil)
 
         override def isEmpty: Boolean = true
-
-        override def size: Int = 0
 
         override def contains[E](element: E): Boolean = false
 
         override def head: Option[Nothing] = None
 
-        def tail: List[Nothing] = List.Nil
+        override def tail: List[Nothing] = Nil
     }
 
-    final case class Cons[+T](size: Int, elem: T, tail: List[T]) extends List[T] {
+    final case class Cons[+T](elem: T, tail: List[T]) extends List[T] {
         override def dropWhile()(predicate: (T) => Boolean): List[T] = {
             if (predicate(elem)) tail.dropWhile()(predicate)
             else this
@@ -190,11 +114,11 @@ object List {
             else tail.drop(size - 1)
         }
 
-        override def setHead[E >: T](element: E): List[E] = Cons(size, element, tail)
+        override def setHead[E >: T](element: E): List[E] = Cons(element, tail)
 
-        override def addToHead[E >: T](element: E): List[E] = Cons(size + 1, element, this)
+        override def addToHead[E >: T](element: E): List[E] = Cons(element, this)
 
-        override def addToTail[E >: T](element: E): List[E] = Cons(size + 1, this.elem, tail.addToTail(element))
+        override def addToTail[E >: T](element: E): List[E] = Cons(this.elem, tail.addToTail(element))
 
         override def isEmpty: Boolean = false
 
