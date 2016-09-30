@@ -8,6 +8,15 @@ sealed trait List[+T] {
 
     import ua.ds.persistent.List._
 
+    @tailrec
+    @inline
+    final def forall(predicate: T => Boolean): Boolean = {
+        this match {
+            case Cons(elem, tail) => if (predicate(elem)) tail.forall(predicate) else false
+            case Nil => true
+        }
+    }
+
     def takeWhile()(predicate: T => Boolean): List[T] = {
         this match {
             case Cons(elem, tail) if predicate(elem) => Cons(elem, tail.takeWhile()(predicate))

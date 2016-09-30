@@ -270,5 +270,17 @@ class PersistentListTest extends FunSuite with Matchers {
 
         list.takeWhile()(e => e > 20).toIterator.toStream should contain inOrder(35, 30, 25)
     }
+
+    test("any predicate is always true for an empty list") {
+        emptyList.forall(e => e != 0) shouldBe true
+    }
+
+    test("should be true if predicate is true for all elements in a list") {
+        emptyList.addToHead(10).addToHead(20).addToHead(30).forall(e => e != 0) shouldBe true
+    }
+
+    test("should be false if predicate is false at least for one element of a list") {
+        emptyList.addToHead(10).addToHead(20).addToHead(30).forall(e => e / 10 != 1) shouldBe false
+    }
 }
 
