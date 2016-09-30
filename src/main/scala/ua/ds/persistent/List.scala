@@ -10,25 +10,26 @@ sealed trait List[+T] {
 
     @tailrec
     @inline
-    final def forall(predicate: T => Boolean): Boolean = {
-        this match {
-            case Cons(elem, tail) => if (predicate(elem)) tail.forall(predicate) else false
-            case Nil => true
-        }
+    final def exists(predicate: T => Boolean): Boolean = this match {
+        case Nil => false
+        case Cons(elem, tail) => if (predicate(elem)) true else tail.exists(predicate)
     }
 
-    def takeWhile()(predicate: T => Boolean): List[T] = {
-        this match {
-            case Cons(elem, tail) if predicate(elem) => Cons(elem, tail.takeWhile()(predicate))
-            case _ => Nil
-        }
+    @tailrec
+    @inline
+    final def forall(predicate: T => Boolean): Boolean = this match {
+        case Cons(elem, tail) => if (!predicate(elem)) false else tail.forall(predicate)
+        case Nil => true
     }
 
-    def take(size: Int): List[T] = {
-        this match {
-            case Cons(elem, tail) if size > 0 => Cons(elem, tail.take(size - 1))
-            case _ => Nil
-        }
+    def takeWhile()(predicate: T => Boolean): List[T] = this match {
+        case Cons(elem, tail) if predicate(elem) => Cons(elem, tail.takeWhile()(predicate))
+        case _ => Nil
+    }
+
+    def take(size: Int): List[T] = this match {
+        case Cons(elem, tail) if size > 0 => Cons(elem, tail.take(size - 1))
+        case _ => Nil
     }
 
     def reverse: List[T] = fold(Nil: List[T])((acc, e) => Cons(e, acc))

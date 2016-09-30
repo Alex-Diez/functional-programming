@@ -282,5 +282,15 @@ class PersistentListTest extends FunSuite with Matchers {
     test("should be false if predicate is false at least for one element of a list") {
         emptyList.addToHead(10).addToHead(20).addToHead(30).forall(e => e / 10 != 1) shouldBe false
     }
+
+    test("an empty list has no any value") {
+        emptyList.exists(e => e + 2 != 20) shouldBe false
+    }
+
+    test("an element exists in a list if it satisfies given predicate") {
+        val list = emptyList.addToHead(10).addToHead(20).addToHead(30).addToHead(40)
+
+        list.exists(e => e + 4 == 24) shouldBe true
+    }
 }
 
