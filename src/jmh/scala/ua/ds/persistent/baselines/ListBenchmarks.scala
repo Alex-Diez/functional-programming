@@ -41,4 +41,19 @@ class ListBenchmarks {
     def filterLargeList(): List[Int] = {
         largeList.filter(e => e % 10 == 0)
     }
+
+    @Benchmark
+    def flatMapSmallList(): List[Int] = {
+        smallList.flatMap(e => List(e, e ,e))
+    }
+
+    @Benchmark
+    def flatMapMediumList(): List[Int] = {
+        mediumList.flatMap(e => List(e, e ,e))
+    }
+
+    @Benchmark
+    def flatMapLargeList(): List[Int] = {
+        largeList.flatMap(e => List(e, e ,e))
+    }
 }

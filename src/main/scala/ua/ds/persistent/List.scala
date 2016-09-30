@@ -9,6 +9,53 @@ sealed trait List[+T] {
 
     import ua.ds.persistent.List._
 
+    def map[A]()(func: T => A): List[A] = {
+        iterate()(func, e => true)
+    }
+
+    def filter()(predicate: T => Boolean): List[T] = {
+        iterate()(e => e, predicate)
+    }
+
+    private def iterate[A]()(func: T => A, predicate: T => Boolean): List[A] = {
+        val buffer = new ArrayBuffer[A](size)
+
+        var list = this
+        while (list.size > 0) {
+            if (predicate(list.head.get)) buffer += func(list.head.get)
+            list = list.tail
+        }
+
+        var counter = buffer.length - 1
+        var result: List[A] = Nil
+        while (counter > -1) {
+            result = result.addToHead(buffer(counter))
+            counter -= 1
+        }
+
+        result
+    }
+
+    def flatMap[A]()(map: T => List[A]): List[A] = {
+
+        val buffer = new ArrayBuffer[List[A]](size)
+
+        var list = this
+        while (!list.isEmpty) {
+            buffer += map(list.head.get)
+            list = list.tail
+        }
+
+        var counter = buffer.length - 1
+        var result: List[A] = Nil
+        while (counter > -1) {
+            result = buffer(counter).concatenate(result)
+            counter -= 1
+        }
+
+        result
+    }
+
     def zipWith[E >: T](other: List[E])(zipper: (E, E) => E): List[E] = {
 
         val buffer = new ArrayBuffer[E](size)
@@ -23,54 +70,6 @@ sealed trait List[+T] {
 
         var counter = buffer.length - 1
         var result: List[E] = Nil
-        while (counter > -1) {
-            result = result.addToHead(buffer(counter))
-            counter -= 1
-        }
-
-        result
-    }
-
-    def flatMap[A]()(map: T => List[A]): List[A] = {
-        this match {
-            case Nil => Nil
-            case Cons(_, elem, tail) => map(elem).concatenate(tail.flatMap()(map))
-        }
-    }
-
-    def filter()(predicate: T => Boolean): List[T] = {
-
-        val buffer = new ArrayBuffer[T](size)
-
-        var list = this
-        while (!list.isEmpty) {
-            if (predicate(list.head.get)) buffer += list.head.get
-
-            list = list.tail
-        }
-
-        var index = buffer.length - 1
-        var result: List[T] = Nil
-        while (index > -1) {
-            result = result.addToHead(buffer(index))
-            index -= 1
-        }
-
-        result
-    }
-
-    def map[A]()(func: T => A): List[A] = {
-
-        val buffer = new ArrayBuffer[A](size)
-
-        var list = this
-        while (list.size > 0) {
-            buffer += func(list.head.get)
-            list = list.tail
-        }
-
-        var counter = size - 1
-        var result: List[A] = Nil
         while (counter > -1) {
             result = result.addToHead(buffer(counter))
             counter -= 1
@@ -113,10 +112,24 @@ sealed trait List[+T] {
     }
 
     def concatenate[E >: T](other: List[E]): List[E] = {
-        this match {
-            case Nil => other
-            case Cons(size, elem, tail) => Cons(size + other.size, elem, tail.concatenate(other))
+
+        val buffer = new ArrayBuffer[E](size)
+
+        var list = this
+        while (!list.isEmpty) {
+            buffer += list.head.get
+            list = list.tail
         }
+
+        var counter = buffer.length - 1
+        var result = other
+        while (counter > -1) {
+            result = result.addToHead(buffer(counter))
+            counter -= 1
+        }
+
+        result
+
     }
 }
 
