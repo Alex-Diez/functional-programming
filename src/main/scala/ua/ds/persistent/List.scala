@@ -8,6 +8,11 @@ sealed trait List[+T] {
 
     import ua.ds.persistent.List._
 
+    def scan[A](init: A)(operation: (A, T) => A): List[A] = this match {
+        case Nil => Nil
+        case Cons(elem, tail) => val v = operation(init, elem); tail.scan(v)(operation).addToHead(v)
+    }
+
     @tailrec
     @inline
     final def exists(predicate: T => Boolean): Boolean = this match {

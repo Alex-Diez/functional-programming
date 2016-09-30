@@ -292,5 +292,15 @@ class PersistentListTest extends FunSuite with Matchers {
 
         list.exists(e => e + 4 == 24) shouldBe true
     }
+
+    test("should be an empty list after scan an empty list") {
+        emptyList.scan(0)((acc, e) => acc + e) shouldBe emptyList
+    }
+
+    test("resulted list should contain results of previous operation") {
+        val list = emptyList.addToHead(4).addToHead(3).addToHead(2).addToHead(1)
+
+        list.scan(0)((acc, v) => acc + v).toIterator.toStream should contain inOrderOnly(1, 3, 6, 10)
+    }
 }
 
