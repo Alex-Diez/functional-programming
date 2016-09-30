@@ -56,4 +56,19 @@ class ListBenchmarks {
     def flatMapLargeList(): List[Int] = {
         largeList.flatMap(e => List(e, e ,e))
     }
+
+    @Benchmark
+    def foldSmallList(): Int = {
+        smallList.fold(0)((acc, v) => acc + v * 2)
+    }
+
+    @Benchmark
+    def foldMediumList(): Int = {
+        mediumList.fold(0)((acc, v) => acc + v * 2)
+    }
+
+    @Benchmark
+    def foldLargeList(): Int = {
+        largeList.fold(0)((acc, v) => acc + v * 2)
+    }
 }

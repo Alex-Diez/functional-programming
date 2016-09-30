@@ -78,7 +78,14 @@ sealed trait List[+T] {
         result
     }
 
-    def fold[E >: T](init: E)(func: (E, E) => E): E
+    @tailrec
+    @inline
+    final def fold[E >: T](init: E)(func: (E, E) => E): E = {
+        this match {
+            case Nil => init
+            case Cons(size, elem, tail) => tail.fold(func(init, elem))(func)
+        }
+    }
 
     def dropWhile()(predicate: (T) => Boolean): List[T]
 
@@ -151,8 +158,6 @@ object List {
     }
 
     case object Nil extends List[Nothing] {
-        override def fold[E >: Nothing](init: E)(func: (E, E) => E): E = init
-
         override def dropWhile()(predicate: (Nothing) => Boolean): List[Nothing] = this
 
         override def drop(size: Int): List[Nothing] = this
@@ -175,10 +180,6 @@ object List {
     }
 
     final case class Cons[+T](size: Int, elem: T, tail: List[T]) extends List[T] {
-        override def fold[E >: T](init: E)(func: (E, E) => E): E = {
-            tail.fold(func(init, elem))(func)
-        }
-
         override def dropWhile()(predicate: (T) => Boolean): List[T] = {
             if (predicate(elem)) tail.dropWhile()(predicate)
             else this
