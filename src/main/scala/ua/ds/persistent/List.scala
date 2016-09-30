@@ -8,7 +8,14 @@ sealed trait List[+T] {
 
     import ua.ds.persistent.List._
 
-    final def take(size: Int): List[T] = {
+    def takeWhile()(predicate: T => Boolean): List[T] = {
+        this match {
+            case Cons(elem, tail) if predicate(elem) => Cons(elem, tail.takeWhile()(predicate))
+            case _ => Nil
+        }
+    }
+
+    def take(size: Int): List[T] = {
         this match {
             case Cons(elem, tail) if size > 0 => Cons(elem, tail.take(size - 1))
             case _ => Nil

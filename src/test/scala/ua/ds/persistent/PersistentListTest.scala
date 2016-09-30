@@ -260,5 +260,15 @@ class PersistentListTest extends FunSuite with Matchers {
 
         list.take(3).toIterator.toStream should contain inOrderOnly(15, 12, 9)
     }
+
+    test("should take nothing from an empty list by predicate") {
+        emptyList.takeWhile()(e => e != 5) shouldBe emptyList
+    }
+
+    test("should take while predicate is true") {
+        val list = emptyList.addToHead(10).addToHead(15).addToHead(20).addToHead(25).addToHead(30).addToHead(35)
+
+        list.takeWhile()(e => e > 20).toIterator.toStream should contain inOrder(35, 30, 25)
+    }
 }
 
