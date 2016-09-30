@@ -250,5 +250,15 @@ class PersistentListTest extends FunSuite with Matchers {
     test("reversed list should be in reverse order") {
         List(0 until 10).reverse.toIterator.toStream should contain inOrderOnly(9, 8, 7, 6, 5, 4, 3, 2, 1, 0)
     }
+
+    test("should take nothing from an empty list") {
+        emptyList.take(5) shouldBe emptyList
+    }
+
+    test("should take 3 first elements from a list") {
+        val list = emptyList.addToHead(3).addToHead(6).addToHead(9).addToHead(12).addToHead(15)
+
+        list.take(3).toIterator.toStream should contain inOrderOnly(15, 12, 9)
+    }
 }
 

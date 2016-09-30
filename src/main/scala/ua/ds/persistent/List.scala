@@ -8,6 +8,13 @@ sealed trait List[+T] {
 
     import ua.ds.persistent.List._
 
+    final def take(size: Int): List[T] = {
+        this match {
+            case Cons(elem, tail) if size > 0 => Cons(elem, tail.take(size - 1))
+            case _ => Nil
+        }
+    }
+
     def reverse: List[T] = fold(Nil: List[T])((acc, e) => Cons(e, acc))
 
     def map[A]()(func: T => A): List[A] = reverse.fold(Nil: List[A])((acc, e) => acc.addToHead(func(e)))
