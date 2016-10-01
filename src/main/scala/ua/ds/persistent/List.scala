@@ -7,7 +7,7 @@ import scala.collection.mutable.ArrayBuffer
 sealed trait List[+T] {
     self =>
 
-    import ua.ds.persistent.List._
+    import List._
 
     def scan[A](init: A)(operation: (A, T) => A): List[A] = this match {
         case Nil => Nil

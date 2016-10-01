@@ -2,38 +2,26 @@ package ua.ds.persistent
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{BeforeAndAfter, FunSuite, Matchers}
+import org.scalatest.{FunSuite, Matchers}
 
 @RunWith(classOf[JUnitRunner])
 class PersistentStackTest extends FunSuite with Matchers {
 
     val emptyStack = Stack[Int]()
 
-    test("An empty stack should have size 0") {
-        emptyStack.size shouldBe 0
+    test("an empty stack should pop nothing") {
+        emptyStack.pop() shouldBe (None, emptyStack)
     }
 
-    test("A stack's size should be increased when push element into it") {
-        val stack = emptyStack.push(1)
+    test("a stack should pop pushed value and the previous stack") {
+        val previous = emptyStack.push(10).push(20)
 
-        stack.size shouldBe 1
+        val stack = previous.push(30)
+
+        stack.pop() shouldBe (Some(30), previous)
     }
 
-    test("A stack's size should be decreased when pop element from it") {
-        val stack = emptyStack.push(10)
-            .push(20)
-
-        stack.size shouldBe 2
-        stack.pop().size shouldBe 1
-    }
-
-    test("A stack should peek value that was pushed into the stack") {
-        val stack = emptyStack.push(10)
-
-        stack.peek shouldBe Some(10)
-    }
-
-    test("A stack should contain element in FIFO order") {
+    test("a stack should contain element in FIFO order") {
         val stack = emptyStack.push(10)
             .push(20)
             .push(30)
@@ -43,7 +31,7 @@ class PersistentStackTest extends FunSuite with Matchers {
         stack.toIterator.toStream should contain inOrderOnly(50, 40, 30, 20, 10)
     }
 
-    test("A stack should be created from existed one") {
+    test("a stack should be created from existed one") {
         val stack = emptyStack.push(30)
             .push(40)
             .push(50)
@@ -54,7 +42,7 @@ class PersistentStackTest extends FunSuite with Matchers {
         otherStack.toIterator.toStream should contain inOrderOnly(100, 80, 60)
     }
 
-    test("A stack should be filtered") {
+    test("a stack should be filtered") {
         val stack = emptyStack.push(20)
             .push(25)
             .push(30)
@@ -66,6 +54,5 @@ class PersistentStackTest extends FunSuite with Matchers {
         val filtered = stack.filter(e => e % 10 == 0)
 
         filtered.toIterator.toStream should contain inOrderOnly(50, 40, 30, 20)
-        filtered.size shouldBe 4
     }
 }

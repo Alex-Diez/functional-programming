@@ -1,19 +1,17 @@
 package ua.ds.persistent
 
 sealed trait Stack[+T] {
-    def peek: Option[T]
+    import Stack._
 
-    def size(): Int
+    def push[E >: T](element: E): Stack[E] = Frame[E](element, this)
 
-    def push[E >: T](element: E): Stack[E] = Stack.Frame[E](size() + 1, element, this)
-
-    def pop(): Stack[T]
+    def pop(): (Option[T], Stack[T])
 
     def toIterator: Iterator[T] = {
         def collect(frame: Stack[T], list: List[T]): List[T] = {
-            frame.peek match {
-                case None => list
-                case Some(v) => collect(frame.pop(), list) addToHead v
+            frame match {
+                case Nil => list
+                case Frame(v, next) => collect(next, list) addToHead v
             }
         }
 
@@ -22,37 +20,31 @@ sealed trait Stack[+T] {
 
     def foreach[A](mapperFunctor: T => A): Stack[A] = {
         this match {
-            case Stack.Nil => Stack.Nil
-            case Stack.Frame(size, element, pop) => Stack.Frame[A](size, mapperFunctor(element), pop.foreach(mapperFunctor))
+            case Nil => Nil
+            case Frame(element, pop) => Frame[A](mapperFunctor(element), pop.foreach(mapperFunctor))
         }
     }
 
     def filter(filterFunctor: (T) => Boolean): Stack[T] = {
         this match {
-            case Stack.Nil => Stack.Nil
-            case Stack.Frame(size, element, pop) =>
-                val elem = pop.filter(filterFunctor)
-                peek match {
-                    case Some(v) if filterFunctor(v) => Stack.Frame(elem.size + 1, v, elem)
-                    case _ => elem
-                }
+            case Nil => Nil
+            case Frame(element, pop) =>
+                val next = pop.filter(filterFunctor)
+                if (filterFunctor(element)) Frame(element, next)
+                else  next
         }
     }
 }
 
 object Stack {
-    def apply[T](): Stack[T] = Stack.Nil
+    def apply[T](): Stack[T] = Nil
 
     case object Nil extends Stack[Nothing] {
-        override def peek: Option[Nothing] = None
-
-        override def size(): Int = 0
-
-        override def pop(): Stack[Nothing] = this
+        override def pop(): (Option[Nothing], Stack[Nothing]) = (None, Nil)
     }
 
-    final case class Frame[T](size: Int, element: T, pop: Stack[T]) extends Stack[T] {
-        override def peek: Option[T] = Some(element)
+    final case class Frame[T](element: T, previous: Stack[T]) extends Stack[T] {
+        override def pop(): (Option[T], Stack[T]) = (Some(element), previous)
     }
 
 }
