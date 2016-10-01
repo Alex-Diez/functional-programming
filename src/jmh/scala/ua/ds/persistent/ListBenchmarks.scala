@@ -89,4 +89,19 @@ class ListBenchmarks {
     def foldLargeList(): Int = {
         firstLargeList.fold(0)((acc, v) => acc + v * 2)
     }
+
+    @Benchmark
+    def addToTailOfSmallList(): List[Int] = {
+        firstSmallList.addToTail(101)
+    }
+
+    @Benchmark
+    def addToTailOfMediumList(): List[Int] = {
+        firstMediumList.addToTail(1001)
+    }
+
+    @Benchmark
+    def addToTailOfLargeList(): List[Int] = {
+        firstLargeList.addToTail(10001)
+    }
 }

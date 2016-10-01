@@ -72,9 +72,10 @@ class PersistentListTest extends FunSuite with Matchers {
     }
 
     test("element should be added to the end of list") {
-        val list = emptyList.addToHead(10).addToTail(20)
+        val list = emptyList.addToHead(30).addToHead(40).addToHead(10).addToTail(20)
 
         list.head shouldBe Some(10)
+        list.toIterator.toStream should contain inOrderOnly(10, 40, 30, 20)
     }
 
     test("iterator should be in order") {
