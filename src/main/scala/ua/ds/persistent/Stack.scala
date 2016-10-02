@@ -1,39 +1,41 @@
 package ua.ds.persistent
 
+import scala.annotation.tailrec
+import scala.collection.AbstractIterator
+
 sealed trait Stack[+T] {
+    self =>
+
     import Stack._
 
     def push[E >: T](element: E): Stack[E] = Frame[E](element, this)
 
     def pop(): (Option[T], Stack[T])
 
-    def toIterator: Iterator[T] = {
-        def collect(frame: Stack[T], list: List[T]): List[T] = {
-            frame match {
-                case Nil => list
-                case Frame(v, next) => collect(next, list) addToHead v
-            }
-        }
+    def toIterator: Iterator[T] = new AbstractIterator[T] {
+        var these = self
 
-        collect(this, List()).toIterator
-    }
+        override def hasNext: Boolean = these != Nil
 
-    def foreach[A](mapperFunctor: T => A): Stack[A] = {
-        this match {
-            case Nil => Nil
-            case Frame(element, pop) => Frame[A](mapperFunctor(element), pop.foreach(mapperFunctor))
+        override def next(): T = {
+            val (value, nextFrame) = these.pop()
+            these = nextFrame
+            value.get
         }
     }
 
-    def filter(filterFunctor: (T) => Boolean): Stack[T] = {
-        this match {
-            case Nil => Nil
-            case Frame(element, pop) =>
-                val next = pop.filter(filterFunctor)
-                if (filterFunctor(element)) Frame(element, next)
-                else  next
-        }
+    def foreach[A](mapperFunctor: T => A): Stack[A] = reverse.fold(Nil: Stack[A])((acc, e) => acc.push(mapperFunctor(e)))
+
+    private def reverse: Stack[T] = fold(Nil: Stack[T])((acc, e) => Frame(e, acc))
+
+    @tailrec
+    @inline
+    private def fold[A](init: A)(func: (A, T) => A): A = this match {
+        case Nil => init
+        case Frame(elem, tail) => tail.fold(func(init, elem))(func)
     }
+
+    def filter(predicate: T => Boolean): Stack[T] = reverse.fold(Nil: Stack[T])((acc, e) => if (predicate(e)) acc.push(e) else acc)
 }
 
 object Stack {
