@@ -46,6 +46,10 @@ class BinarySearchTreeTest extends FunSuite with Matchers {
         tree.contains(40) shouldBe true
     }
 
+    test("should return an empty tree when remove from another empty tree") {
+        emptyTree.remove(10) shouldBe emptyTree
+    }
+
     test("A BST's size should be decreased when remove from") {
         val first = emptyTree.insert(10).insert(20)
 
