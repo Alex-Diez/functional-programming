@@ -1,1 +1,4 @@
 rootProject.name = 'persistent-data-sturctures'
+include 'data-structures-experiments'
+include 'data-structures-practices'
+
