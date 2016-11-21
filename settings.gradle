@@ -1,3 +1,3 @@
-rootProject.name = 'persistent-data-sturctures'
+rootProject.name = 'functional-programming'
 include 'data-structures-experiments'
 include 'data-structures-practices:persistent-list'
