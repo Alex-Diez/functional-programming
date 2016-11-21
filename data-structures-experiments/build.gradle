@@ -12,12 +12,6 @@ version '1.0-SNAPSHOT'
 
 apply plugin: "me.champeau.gradle.jmh"
 
-dependencies {
-    compile "org.scala-lang:scala-library:2.12.0"
-    testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: '3.0.0'
-    testCompile "junit:junit:4.12"
-}
-
 jmh {
     iterations = 10
     benchmarkMode = ['avgt']
